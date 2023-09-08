@@ -1,4 +1,4 @@
-import * as fs from "fs"
+import * as fs from 'fs'
 
 const apiUrl =
   "https://bungie.com/common/destiny2_content/json/en/DestinyInventoryItemDefinition-b83e6d2c-3ddc-42b6-b434-565c3dc82769.json"
@@ -82,65 +82,47 @@ function getRepeatStringIndex(name: RepeatStringsName, s: string): number {
   return index
 }
 
+
 async function downloadJsonFile(url: string): Promise<any> {
   try {
-    const response = await fetch(url)
+    const response = await fetch(url);
+
     if (!response.ok) {
-      throw new Error(`Failed to fetch JSON: ${response.statusText}`)
+      throw new Error(`Failed to fetch JSON: ${response.statusText}`);
     }
-    return await response.json()
+
+    const contentEncoding = response.headers.get('Content-Encoding');
+    console.log(contentEncoding)
+    return response.json()
   } catch (error) {
-    throw new Error(`Failed to download JSON file: ${error}`)
+    throw new Error(`Failed to download JSON file: ${error}`);
   }
 }
 
-async function createMicroDefinition(fullItemDef: JSON): Promise<any> {
-  const fullDef: { [key: string]: any } = {}
-  // const itemDictionary = fullItemDef.toDictionary();
-
-  for (const key in fullItemDef) {
-  }
-  // const i: Json = {};
-
-  // const redacted = item.redacted;
-  // if (redacted) {
-  //   i.r = 1;
-  // }
-
-  // const displayProperties = item.displayProperties;
-  // if (displayProperties) {
-  //   const name = displayProperties.name.toString();
-  //   if (name) {
-  //     i.n = name;
-  //   } else if (!redacted) {
-  //     continue;
-  //   }
-
-  //   const description = displayProperties.description.toString();
-  //   if (description) {
-  //     i.d = getRepeatStringIndex(RepeatStringsName.Descriptions, description);
-  //   }
-
-  //   const icon = displayProperties.icon.toString();
-  //   if (icon) {
-  //     i.i = stripImageUrl(icon);
-  //   }
-  // }
-
-  // ... (rest of the code)
-
-  // fullDef[item.hash.toString()] = i;
-  return fullDef
+interface JsonData {
+  [key: string]: {
+    redacted?: any,
+    value?: {
+      itemValue?: any; // You can replace 'any' with the expected type
+    };
+    displayProperties?: {
+      name?: any,
+      description?: any,
+      icon?: any
+    },
+    secondaryIcon?: any,
+    secondarySpecial?: any,
+    secondaryOverlay?: any,
+    screenshot?: any,
+  };
 }
 
-async function processJson(jsonData: any): Promise<any> {
+async function processJson(jsonData: JsonData): Promise<any> {
   const processedData: { [key: string]: any } = {}
 
   for (const key in jsonData) {
     const item: any = {}
     if (jsonData.hasOwnProperty(key)) {
-      // console.log(jsonData[key])
-
       const redacted = jsonData[key].redacted
       if (redacted) {
         item.r = 1
@@ -169,17 +151,70 @@ async function processJson(jsonData: any): Promise<any> {
         }
       }
 
-      
+      const secondaryIcon = jsonData[key].secondaryIcon
+      if (secondaryIcon) {
+        item.si = stripImageUrl(secondaryIcon)
+      }
 
+      const secondaryOverlay = jsonData[key].secondaryOverlay
+      if (secondaryOverlay) {
+        item.so = stripImageUrl(secondaryOverlay)
+      }
+      const secondarySpecial = jsonData[key].secondarySpecial
+      if (secondarySpecial) {
+        item.ss = stripImageUrl(secondarySpecial)
+      }
+
+      const screenshot = jsonData[key].screenshot
+      if (screenshot) {
+        item.s = stripImageUrl(screenshot)
+      }
+
+      /// Values
+      const itemValues = jsonData[key].value?.itemValue
+
+      if (itemValues) {
+        const v: any[] = [];
+          
+          for (const itemValue of itemValues) {
+            // console.log(itemValue.id, itemValue.name);
+          
+            const val: any = {}
+              
+            const itemHash = itemValue.itemHash
+              
+            if (itemHash === 0 ) {
+                continue
+            }
+            val.ih = getRepeatStringIndex(RepeatStringsName.ItemValue, itemHash)
+            if (itemValue.quantity > 0) {
+              val.q = itemValue.quantity
+            }
+              
+
+            if (Object.keys(val).length > 0) {
+              
+                v.push(val)
+            }
+          }
+          
+          if (Object.keys(v).length > 0) {
+              item.v = v
+          }
+      }
+
+      // Only add items with data
       if (Object.keys(item).length > 0) {
         processedData[key] = item // Assign 'item' directly to the key
       }
     }
   }
 
+  // Add the repeatStrings to the output JSON
   // Create an array of enum names by filtering out invalid enum values
-  const enumNames = Object.keys(RepeatStringsName)
-  .filter(key => isNaN(Number(key))) as (keyof typeof RepeatStringsName)[];
+  const enumNames = Object.keys(RepeatStringsName).filter((key) =>
+    isNaN(Number(key))
+  ) as (keyof typeof RepeatStringsName)[]
 
   // Iterate over the enum names
   for (const enumName of enumNames) {
@@ -203,8 +238,12 @@ async function saveToJsonFile(data: any, filePath: string): Promise<void> {
 
 async function main() {
   try {
+    console.time("download-json")
     const jsonData = await downloadJsonFile(apiUrl)
+    console.timeEnd("download-json")
+    console.time("parse-took:")
     const processedData = await processJson(jsonData)
+    console.timeEnd("parse-took:")
     await saveToJsonFile(processedData, outputFilePath)
   } catch (error) {
     console.error(error)
