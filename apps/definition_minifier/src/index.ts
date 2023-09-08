@@ -1,9 +1,11 @@
 import * as fs from "fs"
 
+// Just needed while prototyping
 const apiUrl =
   "https://bungie.com/common/destiny2_content/json/en/DestinyInventoryItemDefinition-b83e6d2c-3ddc-42b6-b434-565c3dc82769.json"
 const outputFilePath = "output.json"
 
+// Enum for all the repeatedStrings
 enum RepeatStringsName {
   Descriptions,
   DisplaySources,
@@ -35,6 +37,7 @@ enum RepeatStringsName {
   TalentGridHash,
 }
 
+// Interface (Schema) for the DestinyItemDefinition
 interface JsonData {
   [key: string]: {
     redacted?: any
@@ -54,17 +57,24 @@ interface JsonData {
     nonTransferrable?: any
     allowActions?: any
     equippable?: any
+    doesPostmasterPullHaveSideEffects?: any
+    displaySource?: any
+    itemType?: any
+    itemSubType?: any
+    classType?: any
+    itemTypeDisplayName?: any
     inventory?: {
       tierType?: any
-      maxStackSize?: any 
-      bucketTypeHash?: any 
-      stackUniqueLabel?: any 
-      expirationTooltip?: any 
+      maxStackSize?: any
+      bucketTypeHash?: any
+      stackUniqueLabel?: any
+      expirationTooltip?: any
       expiredInActivityMessage?: any
     }
   }
 }
 
+// Dictionary of the repeat string arrays
 const repeatStrings: Record<RepeatStringsName, string[]> = {
   [RepeatStringsName.Descriptions]: [],
   [RepeatStringsName.DisplaySources]: [],
@@ -96,12 +106,7 @@ const repeatStrings: Record<RepeatStringsName, string[]> = {
   [RepeatStringsName.TalentGridHash]: [],
 }
 
-function stripImageUrl(url: string): string {
-  const index = url.lastIndexOf("/")
-  const shortUrl = url.substring(index + 1)
-  return shortUrl
-}
-
+// Send a repeat string and get a index value back
 function getRepeatStringIndex(name: RepeatStringsName, s: string): number {
   const index = repeatStrings[name].indexOf(s)
   if (index === -1) {
@@ -111,6 +116,16 @@ function getRepeatStringIndex(name: RepeatStringsName, s: string): number {
 
   return index
 }
+
+// Strip off the url so only the image name is left
+// http:bungie.com/blah/blah/123.jpg -> 123.jpg
+function stripImageUrl(url: string): string {
+  const index = url.lastIndexOf("/")
+  const shortUrl = url.substring(index + 1)
+  return shortUrl
+}
+
+
 
 async function downloadJsonFile(url: string): Promise<any> {
   try {
@@ -196,6 +211,43 @@ async function processJson(jsonData: JsonData): Promise<any> {
         item.e = 1
       }
 
+      const doesPostmasterPullHaveSideEffects =
+        jsonData[key].doesPostmasterPullHaveSideEffects
+      if (doesPostmasterPullHaveSideEffects) {
+        item.pm = 1
+      }
+
+      const displaySource = jsonData[key].displaySource
+      if (displaySource) {
+        item.ds = getRepeatStringIndex(
+          RepeatStringsName.DisplaySources,
+          displaySource
+        )
+      }
+
+      const itemType = jsonData[key].itemType
+      if (itemType) {
+        item.it = itemType
+      }
+
+      const itemSubType = jsonData[key].itemSubType
+      if (itemSubType) {
+        item.is = itemSubType
+      }
+
+      const classType = jsonData[key].classType
+      if (classType) {
+        item.c = classType
+      }
+
+      const itemTypeDisplayName = jsonData[key].itemTypeDisplayName
+      if (itemTypeDisplayName) {
+        item.itd = getRepeatStringIndex(
+          RepeatStringsName.ItemTypeDisplayName,
+          itemTypeDisplayName
+        )
+      }
+
       /// Values
       const itemValues = jsonData[key].value?.itemValue
 
@@ -203,8 +255,6 @@ async function processJson(jsonData: JsonData): Promise<any> {
         const v: any[] = []
 
         for (const itemValue of itemValues) {
-          // console.log(itemValue.id, itemValue.name);
-
           const val: any = {}
 
           const itemHash = itemValue.itemHash
@@ -230,7 +280,7 @@ async function processJson(jsonData: JsonData): Promise<any> {
       /// inventory
       const inventory = jsonData[key].inventory
       if (inventory) {
-        const tierType = inventory?.tierType 
+        const tierType = inventory?.tierType
         if (tierType) {
           item.t = tierType
         }
@@ -306,7 +356,6 @@ async function processJson(jsonData: JsonData): Promise<any> {
 
   // Iterate over the enum names
   for (const enumName of enumNames) {
-    // console.log(typeof(enumName), RepeatStringsName[enumName])
     const stringArray = repeatStrings[RepeatStringsName[enumName]]
     processedData[enumName] = stringArray
   }
@@ -329,11 +378,14 @@ async function main() {
     console.time("download-json")
     const jsonData = await downloadJsonFile(apiUrl)
     console.timeEnd("download-json")
+
     console.time("parse-took:")
     const processedData = await processJson(jsonData)
     console.timeEnd("parse-took:")
+
     await saveToJsonFile(processedData, outputFilePath)
-  } catch (error) {
+  } 
+  catch (error) {
     console.error(error)
   }
 }
