@@ -11,7 +11,7 @@ importers:
   apps/definition_minifier:
     devDependencies:
       '@types/node':
-        specifier: 18.17.14
+        specifier: ^18.17.14
         version: 18.17.14
       typescript:
         specifier: ^5.2.2
