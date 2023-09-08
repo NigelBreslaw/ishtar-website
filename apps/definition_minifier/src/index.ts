@@ -40,6 +40,16 @@ enum RepeatStringsName {
 // Interface (Schema) for the DestinyItemDefinition
 interface JsonData {
   [key: string]: {
+    displayVersionWatermarkIcons: any
+    quality?: {
+      versions?: any[]
+    }
+    iconWatermark?: any
+    uiItemDisplayStyle?: any
+    equippingBlock?: any
+    breakerType?: any
+    talentGrid?: any
+    damageTypeHashes?: any
     redacted?: any
     value?: {
       itemValue?: [itemHash?: string, quantity?: any]
@@ -124,8 +134,6 @@ function stripImageUrl(url: string): string {
   const shortUrl = url.substring(index + 1)
   return shortUrl
 }
-
-
 
 async function downloadJsonFile(url: string): Promise<any> {
   try {
@@ -341,6 +349,313 @@ async function processJson(jsonData: JsonData): Promise<any> {
           item.iv = iv
         }
       }
+
+      const damageTypeHashes = jsonData[key].damageTypeHashes
+      if (damageTypeHashes) {
+        const dt: any[] = []
+
+        for (const damageHash of damageTypeHashes) {
+          dt.push(
+            getRepeatStringIndex(RepeatStringsName.DamageTypeHashes, damageHash)
+          )
+        }
+
+        if (dt.length > 0) {
+          item.dt = dt
+        }
+      }
+
+      ///equipping block?
+      const ammoType = jsonData[key].equippingBlock?.ammoType
+      if (ammoType) {
+        item.at = ammoType
+      }
+
+      const breakerType = jsonData[key].breakerType
+      if (breakerType) {
+        item.bt = breakerType
+      }
+
+      /// Is this needed any more?
+      const talentGridHash = jsonData[key].talentGrid?.talentGridHash
+      if (talentGridHash && talentGridHash !== 0) {
+        item.th = getRepeatStringIndex(
+          RepeatStringsName.TalentGridHash,
+          talentGridHash
+        )
+      }
+
+      const uiItemDisplayStyle = jsonData[key].uiItemDisplayStyle
+      if (uiItemDisplayStyle) {
+        item.ids = getRepeatStringIndex(
+          RepeatStringsName.UiItemDisplayStyle,
+          uiItemDisplayStyle
+        )
+      }
+
+      const iconWatermark = jsonData[key].iconWatermark
+      if (iconWatermark) {
+        item.iw = getRepeatStringIndex(
+          RepeatStringsName.IconWaterMark,
+          stripImageUrl(iconWatermark)
+        )
+      }
+
+      // Quality
+      const quality = jsonData[key].quality
+      if (quality) {
+        const versions = quality.versions
+
+        if (versions) {
+          const qv: any[] = []
+          for (const version of versions) {
+            qv.push(
+              getRepeatStringIndex(
+                RepeatStringsName.Versions,
+                version.powerCapHash
+              )
+            )
+          }
+          if (qv.length > 0) {
+            item.qv = qv
+          }
+        }
+
+        const displayVersionWatermarkIcons = jsonData[key].displayVersionWatermarkIcons
+        if (displayVersionWatermarkIcons) {
+          const dvwi: any[] = []
+
+            for (const watermark in displayVersionWatermarkIcons) {
+                if (!watermark) {
+                    continue
+                }
+                dvwi.push(getRepeatStringIndex(RepeatStringsName.IconWaterMark, stripImageUrl(watermark)))
+            }
+
+            if (dvwi.length > 0) {
+                item.dvwi = dvwi
+            }
+        }
+      }
+
+      // /// Stats
+      // var stats = item.stats
+      // if stats {
+
+      //     Json st
+
+      //     var itemStats = stats.stats.toDictionary()
+
+      //     Json s
+      //     for var stat in itemStats.keys() {
+      //         s[root.getRepeatStringIndex(.StatHash, stat).toString()] = itemStats[stat].value.toInt()
+      //     }
+      //     if s {
+      //         st.s = s
+      //     }
+
+      //     var statGroupHash = stats.statGroupHash.toString()
+      //     if statGroupHash {
+      //         st.sgs = root.getRepeatStringIndex(.StatGroupHash, statGroupHash)
+      //     }
+
+      //     if st {
+      //         i.st = st
+      //     }
+      // }
+
+      // var previewVendorHash = item.preview.previewVendorHash
+
+      // if previewVendorHash {
+      //     var p = previewVendorHash.toString()
+
+      //     if p.length  > 1 {
+      //         i.pv = p
+      //     }
+      // }
+
+      // /// setData
+      // var setData = item.setData
+      // if setData {
+      //     Json sD
+
+      //     var questLineName = setData.questLineName
+      //     if questLineName {
+      //         sD.qN = questLineName
+      //     }
+
+      //     if sD {
+      //         i.sD = sD
+      //     }
+      // }
+
+      // var tooltipNotifications = item.tooltipNotifications
+      // if tooltipNotifications {
+      //     Json[] ttn
+
+      //     for var tt in tooltipNotifications.toArray() {
+      //         var ttString = tt.displayString.toString()
+
+      //         if ttString {
+      //             ttn.append(root.getRepeatStringIndex(.TooltipNotifications, ttString))
+      //         }
+
+      //         /// NOTE!!! Ishtar only uses the first tooltip so no need to keep the others?
+      //         /// Hmmm probably was used by some items in the detail view?
+      //         break
+
+      //     }
+
+      //     if ttn.length > 0 {
+      //         i.ttn = ttn
+      //     }
+      // }
+
+      // /// Perks
+      // var perks = item.perks
+      // if perks {
+      //     Json[] ph
+
+      //     for var perk in perks.toArray() {
+
+      //         Json jPerk
+      //         var perkHash = perk.perkHash
+      //         if perkHash {
+      //             jPerk.ph = perkHash
+      //         }
+      //         var perkVisibility = perk.perkVisibility.toInt()
+      //         if perkVisibility {
+      //             jPerk.pv = perkVisibility
+      //         }
+
+      //         if jPerk {
+      //             ph.append(jPerk)
+      //         }
+      //     }
+
+      //     if ph.length > 0 {
+
+      //         i.ph = ph
+      //     }
+      // }
+
+      // var plug = item.plug
+      // if plug {
+
+      //     Json p
+
+      //     var plugCategoryHash = plug.plugCategoryHash.toString()
+      //     if plugCategoryHash {
+      //         p.p = root.getRepeatStringIndex(.PlugCategoryHash, plugCategoryHash)
+      //     }
+
+      //     /// NOTE: This change breaks the existing app. All it needs to do to get the correct
+      //     /// PlugCategoryIdentifier is use the p.p index number to get the name from the
+      //     /// PlugCategoryIdentifier array in the jsonDef
+      //     var plugCategoryIdentifier = plug.plugCategoryIdentifier.toString()
+      //     if plugCategoryIdentifier {
+      //         /// Intentionally call the function but don't save the result here. The p.p index will be the same.
+      //         root.getRepeatStringIndex(.PlugCategoryIdentifier, plugCategoryIdentifier)
+      //     }
+
+      //     var uiPlugLabel = plug.uiPlugLabel.toString()
+      //     if uiPlugLabel {
+      //         p.pl = root.getRepeatStringIndex(.UiPlugLabel, uiPlugLabel)
+      //     }
+
+      //     var insertionMaterialRequirementHash = plug.insertionMaterialRequirementHash.toString()
+      //     if insertionMaterialRequirementHash && insertionMaterialRequirementHash != "0" {
+      //         p.im = root.getRepeatStringIndex(.InsertionMaterialRequirementHash, insertionMaterialRequirementHash)
+      //     }
+
+      //     if p {
+      //         i.p = p
+      //     }
+      // }
+
+      // var traitIds = item.traitIds
+
+      // if traitIds {
+      //     Json ti
+
+      //     for var traitId in traitIds.toArray() {
+      //         ti.append(root.getRepeatStringIndex(.TraitIds, traitId.toString()))
+      //     }
+
+      //     if ti {
+      //         i.tI = ti
+      //     }
+      // }
+
+      // /// NOTE:!!!! This changes the names of many socket properties and will break current Ishtar
+      // var sockets = item.sockets
+      // if sockets {
+
+      //     Json sk
+
+      //     var socketEntries = sockets.socketEntries
+
+      //     Json[] se
+      //     for var socketEntry in socketEntries.toArray() {
+      //         Json socEntry
+      //         var p = socketEntry.plugSources
+      //         // System.log(socketEntry)
+      //         if p {
+      //             socEntry.p = p.toInt()
+      //         }
+      //         //socketTypeHash
+      //         //
+      //         var st = socketEntry.socketTypeHash.toString()
+      //         if st {
+      //             socEntry.st = root.getRepeatStringIndex(.SocketTypeHash, st)
+      //         }
+      //         var rp = socketEntry.reusablePlugSetHash.toString()
+      //         if rp {
+      //             socEntry.r = root.getRepeatStringIndex(.ReusablePlugSetHash, rp)
+      //         }
+
+      //         var s = socketEntry.singleInitialItemHash.toString()
+      //         if s && s != "0" {
+      //             socEntry.s = root.getRepeatStringIndex(.SingleInitialItemHash, s)
+      //         }
+
+      //         if socEntry {
+      //             se.append(socEntry)
+      //         }
+
+      //     }
+
+      //     if se.length > 0 {
+      //         sk.se = root.getRepeatStringIndex(.SocketEntries, Json.stringify(se))
+      //     }
+
+      //     Json[] scJson
+      //     for var socketCategory in sockets.socketCategories.toArray() {
+      //         Json socCatEntry
+
+      //         var h = socketCategory.socketCategoryHash.toString()
+      //         if h {
+      //             socCatEntry.h = root.getRepeatStringIndex(.SocketCategoryHash, h)
+      //         }
+
+      //         /// NOTE: In ishtar you want to Json.parse the string you get to turn it into a json array.
+      //         var socketIndexes = socketCategory.socketIndexes
+      //         if socketIndexes {
+      //             socCatEntry.i = root.getRepeatStringIndex(.SocketIndexes, Json.stringify(socketIndexes))
+      //             scJson.append(socCatEntry)
+      //         }
+
+      //     }
+      //     if scJson.length > 0 {
+      //         /// NOTE: In ishtar you want to Json.parse the string you get to turn it into a json array.
+      //         sk.sc = root.getRepeatStringIndex(.SocketCategories, Json.stringify(scJson))
+      //     }
+
+      //     if sk {
+      //         i.sk = sk
+      //     }
+
+      // }
     }
     // Only add items with data
     if (Object.keys(item).length > 0) {
@@ -384,8 +699,7 @@ async function main() {
     console.timeEnd("parse-took:")
 
     await saveToJsonFile(processedData, outputFilePath)
-  } 
-  catch (error) {
+  } catch (error) {
     console.error(error)
   }
 }
