@@ -10,6 +10,9 @@ importers:
 
   apps/definition_minifier:
     devDependencies:
+      '@types/node':
+        specifier: 18.17.14
+        version: 18.17.14
       typescript:
         specifier: ^5.2.2
         version: 5.2.2
@@ -822,6 +825,10 @@ packages:
     dependencies:
       '@types/unist': 2.0.8
     dev: false
+
+  /@types/node@18.17.14:
+    resolution: {integrity: sha512-ZE/5aB73CyGqgQULkLG87N9GnyGe5TcQjv34pwS8tfBs1IkCh0ASM69mydb2znqd6v0eX+9Ytvk6oQRqu8T1Vw==}
+    dev: true
 
   /@types/parse5@6.0.3:
     resolution: {integrity: sha512-SuT16Q1K51EAVPz1K29DJ/sXjhSQ0zjvsypYJ6tlwVsRV9jwW5Adq2ch8Dq8kDBCkYnELS7N7VNCSB5nC56t/g==}
