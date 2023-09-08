@@ -177,6 +177,17 @@ async function processJson(jsonData: any): Promise<any> {
     }
   }
 
+  // Create an array of enum names by filtering out invalid enum values
+  const enumNames = Object.keys(RepeatStringsName)
+  .filter(key => isNaN(Number(key))) as (keyof typeof RepeatStringsName)[];
+
+  // Iterate over the enum names
+  for (const enumName of enumNames) {
+    // console.log(typeof(enumName), RepeatStringsName[enumName])
+    const stringArray = repeatStrings[RepeatStringsName[enumName]]
+    processedData[enumName] = stringArray
+  }
+
   return processedData
 }
 
