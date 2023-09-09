@@ -604,7 +604,7 @@ async function processJson(jsonData: JsonData): Promise<any> {
 
           const se: any[] = []
           for (const socketEntry of socketEntries) {
-              const socEntry: any
+              const socEntry: any = {}
               const p = socketEntry?.plugSources
 
               if (p) {
@@ -638,7 +638,7 @@ async function processJson(jsonData: JsonData): Promise<any> {
 
           const scJson: any[] = []
           for (const socketCategory of sockets.socketCategories) {
-              const socCatEntry: any
+              const socCatEntry: any = {}
 
               var h = socketCategory?.socketCategoryHash
               if (h) {
