@@ -40,6 +40,12 @@ enum RepeatStringsName {
 // Interface (Schema) for the DestinyItemDefinition
 interface JsonData {
   [key: string]: {
+    perks: any
+    tooltipNotifications: any
+    setData: any
+    preview: any
+    traitIds: any
+    stats: any
     displayVersionWatermarkIcons: any
     quality?: {
       versions?: any[]
@@ -438,157 +444,156 @@ async function processJson(jsonData: JsonData): Promise<any> {
         }
       }
 
-      // /// Stats
-      // var stats = item.stats
-      // if stats {
+      /// Stats
+      var stats = jsonData[key].stats
+      if (stats) {
 
-      //     Json st
+          const st: any = {}
 
-      //     var itemStats = stats.stats.toDictionary()
+          const itemStats = stats.stats
 
-      //     Json s
-      //     for var stat in itemStats.keys() {
-      //         s[root.getRepeatStringIndex(.StatHash, stat).toString()] = itemStats[stat].value.toInt()
-      //     }
-      //     if s {
-      //         st.s = s
-      //     }
+          const s: any = {}
+          for (const key in itemStats) {
+              s[getRepeatStringIndex(RepeatStringsName.StatHash, key)] = itemStats[key].value
+          }
+         
+          if (Object.keys(s).length > 0) {
+              st.s = s
+          }
 
-      //     var statGroupHash = stats.statGroupHash.toString()
-      //     if statGroupHash {
-      //         st.sgs = root.getRepeatStringIndex(.StatGroupHash, statGroupHash)
-      //     }
+          var statGroupHash = stats.statGroupHash
+          if (statGroupHash) {
+              st.sgs = getRepeatStringIndex(RepeatStringsName.StatGroupHash, statGroupHash)
+          }
 
-      //     if st {
-      //         i.st = st
-      //     }
-      // }
+          if (Object.keys(st).length > 0) {
+              item.st = st
+          }
+      }
 
-      // var previewVendorHash = item.preview.previewVendorHash
+      var previewVendorHash = jsonData[key].preview?.previewVendorHash
 
-      // if previewVendorHash {
-      //     var p = previewVendorHash.toString()
+      if (previewVendorHash) {
+          const p = previewVendorHash
+          if (p) {
+              item.pv = p
+          }
+      }
 
-      //     if p.length  > 1 {
-      //         i.pv = p
-      //     }
-      // }
+      /// setData
+      const setData = jsonData[key].setData
+      if (setData) {
+          const sD: any = {}
 
-      // /// setData
-      // var setData = item.setData
-      // if setData {
-      //     Json sD
+          const questLineName = setData.questLineName
+          if (questLineName) {
+              sD.qN = questLineName
+          }
 
-      //     var questLineName = setData.questLineName
-      //     if questLineName {
-      //         sD.qN = questLineName
-      //     }
+          if (sD) {
+              item.sD = sD
+          }
+      }
 
-      //     if sD {
-      //         i.sD = sD
-      //     }
-      // }
+      const tooltipNotifications = jsonData[key].tooltipNotifications
+      if (tooltipNotifications) {
+          const ttn: any[] = []
 
-      // var tooltipNotifications = item.tooltipNotifications
-      // if tooltipNotifications {
-      //     Json[] ttn
+          for (const tt of tooltipNotifications) {
+              const ttString = tt.displayString
 
-      //     for var tt in tooltipNotifications.toArray() {
-      //         var ttString = tt.displayString.toString()
+              if (ttString) {
+                  ttn.push(getRepeatStringIndex(RepeatStringsName.TooltipNotifications, ttString))
+              }
 
-      //         if ttString {
-      //             ttn.append(root.getRepeatStringIndex(.TooltipNotifications, ttString))
-      //         }
+              /// NOTE!!! Ishtar only uses the first tooltip so no need to keep the others?
+              /// Hmmm probably was used by some items in the detail view?
+              break
 
-      //         /// NOTE!!! Ishtar only uses the first tooltip so no need to keep the others?
-      //         /// Hmmm probably was used by some items in the detail view?
-      //         break
+          }
 
-      //     }
+          if (ttn.length > 0) {
+              item.ttn = ttn
+          }
+      }
 
-      //     if ttn.length > 0 {
-      //         i.ttn = ttn
-      //     }
-      // }
+      /// Perks
+      const perks = jsonData[key].perks
+      if (perks) {
+          const ph: any[] = []
 
-      // /// Perks
-      // var perks = item.perks
-      // if perks {
-      //     Json[] ph
+          for (const perk of perks) {
 
-      //     for var perk in perks.toArray() {
+              const jPerk: any = {}
+              const perkHash = perk.perkHash
+              if (perkHash) {
+                  jPerk.ph = perkHash
+              }
+              var perkVisibility = perk.perkVisibility
+              if (perkVisibility) {
+                  jPerk.pv = perkVisibility
+              }
 
-      //         Json jPerk
-      //         var perkHash = perk.perkHash
-      //         if perkHash {
-      //             jPerk.ph = perkHash
-      //         }
-      //         var perkVisibility = perk.perkVisibility.toInt()
-      //         if perkVisibility {
-      //             jPerk.pv = perkVisibility
-      //         }
+              if ((Object.keys(jPerk).length > 0)) {
+                  ph.push(jPerk)
+              }
+          }
 
-      //         if jPerk {
-      //             ph.append(jPerk)
-      //         }
-      //     }
+          if (ph.length > 0) {
 
-      //     if ph.length > 0 {
+              item.ph = ph
+          }
+      }
 
-      //         i.ph = ph
-      //     }
-      // }
+      var plug = jsonData[key].plug
+      if plug {
 
-      // var plug = item.plug
-      // if plug {
+          Json p
 
-      //     Json p
+          var plugCategoryHash = plug.plugCategoryHash.toString()
+          if plugCategoryHash {
+              p.p = root.getRepeatStringIndex(.PlugCategoryHash, plugCategoryHash)
+          }
 
-      //     var plugCategoryHash = plug.plugCategoryHash.toString()
-      //     if plugCategoryHash {
-      //         p.p = root.getRepeatStringIndex(.PlugCategoryHash, plugCategoryHash)
-      //     }
+          /// NOTE: This change breaks the existing app. All it needs to do to get the correct
+          /// PlugCategoryIdentifier is use the p.p index number to get the name from the
+          /// PlugCategoryIdentifier array in the jsonDef
+          var plugCategoryIdentifier = plug.plugCategoryIdentifier.toString()
+          if plugCategoryIdentifier {
+              /// Intentionally call the function but don't save the result here. The p.p index will be the same.
+              root.getRepeatStringIndex(.PlugCategoryIdentifier, plugCategoryIdentifier)
+          }
 
-      //     /// NOTE: This change breaks the existing app. All it needs to do to get the correct
-      //     /// PlugCategoryIdentifier is use the p.p index number to get the name from the
-      //     /// PlugCategoryIdentifier array in the jsonDef
-      //     var plugCategoryIdentifier = plug.plugCategoryIdentifier.toString()
-      //     if plugCategoryIdentifier {
-      //         /// Intentionally call the function but don't save the result here. The p.p index will be the same.
-      //         root.getRepeatStringIndex(.PlugCategoryIdentifier, plugCategoryIdentifier)
-      //     }
+          var uiPlugLabel = plug.uiPlugLabel.toString()
+          if uiPlugLabel {
+              p.pl = root.getRepeatStringIndex(.UiPlugLabel, uiPlugLabel)
+          }
 
-      //     var uiPlugLabel = plug.uiPlugLabel.toString()
-      //     if uiPlugLabel {
-      //         p.pl = root.getRepeatStringIndex(.UiPlugLabel, uiPlugLabel)
-      //     }
+          var insertionMaterialRequirementHash = plug.insertionMaterialRequirementHash.toString()
+          if insertionMaterialRequirementHash && insertionMaterialRequirementHash != "0" {
+              p.im = root.getRepeatStringIndex(.InsertionMaterialRequirementHash, insertionMaterialRequirementHash)
+          }
 
-      //     var insertionMaterialRequirementHash = plug.insertionMaterialRequirementHash.toString()
-      //     if insertionMaterialRequirementHash && insertionMaterialRequirementHash != "0" {
-      //         p.im = root.getRepeatStringIndex(.InsertionMaterialRequirementHash, insertionMaterialRequirementHash)
-      //     }
+          if p {
+              i.p = p
+          }
+      }
 
-      //     if p {
-      //         i.p = p
-      //     }
-      // }
+      var traitIds = jsonData[key].traitIds
+      if (traitIds) {
+          const ti: any[] = []
 
-      // var traitIds = item.traitIds
+          for (const traitId of traitIds) {
+              ti.push(getRepeatStringIndex(RepeatStringsName.TraitIds, traitId))
+          }
 
-      // if traitIds {
-      //     Json ti
-
-      //     for var traitId in traitIds.toArray() {
-      //         ti.append(root.getRepeatStringIndex(.TraitIds, traitId.toString()))
-      //     }
-
-      //     if ti {
-      //         i.tI = ti
-      //     }
-      // }
+          if (ti.length > 0) {
+              item.tI = ti
+          }
+      }
 
       // /// NOTE:!!!! This changes the names of many socket properties and will break current Ishtar
-      // var sockets = item.sockets
+      // var sockets = jsonData[key].sockets
       // if sockets {
 
       //     Json sk
@@ -680,7 +685,7 @@ async function processJson(jsonData: JsonData): Promise<any> {
 
 async function saveToJsonFile(data: any, filePath: string): Promise<void> {
   try {
-    const jsonString = JSON.stringify(data, null, 2)
+    const jsonString = JSON.stringify(data, null, 0)
     await fs.promises.writeFile(filePath, jsonString, "utf-8")
     console.log(`Data saved to ${filePath}`)
   } catch (error) {
