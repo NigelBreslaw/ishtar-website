@@ -537,7 +537,7 @@ function saveToJsonFile(data, filePath) {
 }
 function loadJsonFile(path) {
     return new Promise((resolve, reject) => {
-        fs.readFile(path, 'utf8', (err, data) => {
+        fs.readFile(path, "utf8", (err, data) => {
             if (err) {
                 reject(err);
                 return;
@@ -585,7 +585,7 @@ function isNewManifest(jsonManifest) {
             return JSON.stringify(jsonManifest) !== JSON.stringify(oldJson);
         }
         catch (error) {
-            console.error('Error comparing JSON files:', error);
+            console.error("Error comparing JSON files:", error);
             return false;
         }
     });
@@ -597,20 +597,24 @@ function main() {
             const manifestUrl = "https://www.bungie.net/Platform/Destiny2/Manifest/";
             const jsonManifest = yield downloadJsonFile(manifestUrl);
             const isNew = yield isNewManifest(jsonManifest);
-            console.log("isNew?: ", isNew);
-            // const manifestSavePath = path.join(__dirname, "../runner/bungieManifest.json")
-            // await saveToJsonFile(jsonManifest, manifestSavePath)
-            // const jsonManifest = await downloadJsonFile(manifestUrl)
-            // console.timeEnd("download-manifest")
-            // const jsonWorldComponentContentPaths =
-            //   jsonManifest.Response.jsonWorldComponentContentPaths
-            // console.time("total-json-parse")
-            // await useContentPaths(jsonWorldComponentContentPaths)
-            // console.timeEnd("total-json-parse")
-            // const time = new Date().toISOString()
-            // const manifest = { version: time}
-            // const savePath = path.join(__dirname, `../../frontend/public/json/manifest.json`) 
-            // await saveToJsonFile(manifest, savePath)
+            if (isNew) {
+                const jsonManifest = yield downloadJsonFile(manifestUrl);
+                console.timeEnd("download-manifest");
+                const jsonWorldComponentContentPaths = jsonManifest.Response.jsonWorldComponentContentPaths;
+                console.time("total-json-parse");
+                yield useContentPaths(jsonWorldComponentContentPaths);
+                console.timeEnd("total-json-parse");
+                const time = new Date().toISOString();
+                const manifest = { version: time };
+                const savePath = path_1.default.join(__dirname, `../../frontend/public/json/manifest.json`);
+                yield saveToJsonFile(manifest, savePath);
+                const manifestSavePath = path_1.default.join(__dirname, "../runner/bungieManifest.json");
+                yield saveToJsonFile(jsonManifest, manifestSavePath);
+            }
+            else {
+                console.log("No new manifest detected");
+                process.exit(1);
+            }
         }
         catch (error) {
             console.error(error);
