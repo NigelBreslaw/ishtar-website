@@ -31,8 +31,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const fs = __importStar(require("fs"));
+const path_1 = __importDefault(require("path"));
 // Just needed while prototyping
 const apiUrl = "https://bungie.com/common/destiny2_content/json/en/DestinyInventoryItemDefinition-b83e6d2c-3ddc-42b6-b434-565c3dc82769.json";
 const outputFilePath = "output.json";
@@ -531,6 +535,23 @@ function saveToJsonFile(data, filePath) {
         }
     });
 }
+function loadJsonFile(path) {
+    return new Promise((resolve, reject) => {
+        fs.readFile(path, 'utf8', (err, data) => {
+            if (err) {
+                reject(err);
+                return;
+            }
+            try {
+                const jsonData = JSON.parse(data);
+                resolve(jsonData);
+            }
+            catch (parseError) {
+                reject(parseError);
+            }
+        });
+    });
+}
 function useContentPaths(jsonWorldComponentContentPaths) {
     return __awaiter(this, void 0, void 0, function* () {
         const promises = [];
@@ -551,9 +572,22 @@ function downloadAndMinifyDefinition(definitionUrl, key) {
         console.time(`${key} parse-took:`);
         const processedData = yield processJson(jsonData);
         console.timeEnd(`${key} parse-took:`);
-        const outputFilePath = `apps/frontend/public/json/${key}.json`;
+        const outputFilePath = path_1.default.join(__dirname, `../../frontend/public/json/${key}.json`);
         yield saveToJsonFile(processedData, outputFilePath);
         console.log("");
+    });
+}
+function isNewManifest(jsonManifest) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const manifestPath = path_1.default.join(__dirname, "../runner/bungieManifest.json");
+            const oldJson = yield loadJsonFile(manifestPath);
+            return JSON.stringify(jsonManifest) !== JSON.stringify(oldJson);
+        }
+        catch (error) {
+            console.error('Error comparing JSON files:', error);
+            return false;
+        }
     });
 }
 function main() {
@@ -562,14 +596,21 @@ function main() {
             console.time("download-manifest");
             const manifestUrl = "https://www.bungie.net/Platform/Destiny2/Manifest/";
             const jsonManifest = yield downloadJsonFile(manifestUrl);
-            console.timeEnd("download-manifest");
-            const jsonWorldComponentContentPaths = jsonManifest.Response.jsonWorldComponentContentPaths;
-            console.time("total-json-parse");
-            yield useContentPaths(jsonWorldComponentContentPaths);
-            console.timeEnd("total-json-parse");
-            const time = new Date().toISOString();
-            const manifest = { version: time };
-            yield saveToJsonFile(manifest, 'apps/frontend/public/json/manifest.json');
+            const isNew = yield isNewManifest(jsonManifest);
+            console.log("isNew?: ", isNew);
+            // const manifestSavePath = path.join(__dirname, "../runner/bungieManifest.json")
+            // await saveToJsonFile(jsonManifest, manifestSavePath)
+            // const jsonManifest = await downloadJsonFile(manifestUrl)
+            // console.timeEnd("download-manifest")
+            // const jsonWorldComponentContentPaths =
+            //   jsonManifest.Response.jsonWorldComponentContentPaths
+            // console.time("total-json-parse")
+            // await useContentPaths(jsonWorldComponentContentPaths)
+            // console.timeEnd("total-json-parse")
+            // const time = new Date().toISOString()
+            // const manifest = { version: time}
+            // const savePath = path.join(__dirname, `../../frontend/public/json/manifest.json`) 
+            // await saveToJsonFile(manifest, savePath)
         }
         catch (error) {
             console.error(error);
