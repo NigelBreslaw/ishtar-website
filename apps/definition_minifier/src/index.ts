@@ -151,8 +151,6 @@ async function downloadJsonFile(url: string): Promise<any> {
       throw new Error(`Failed to fetch JSON: ${response.statusText}`)
     }
 
-    const contentEncoding = response.headers.get("Content-Encoding")
-    console.log(contentEncoding)
     return response.json()
   } catch (error) {
     throw new Error(`Failed to download JSON file: ${error}`)
@@ -429,239 +427,282 @@ async function processJson(jsonData: JsonData): Promise<any> {
           }
         }
 
-        const displayVersionWatermarkIcons = jsonData[key].displayVersionWatermarkIcons
+        const displayVersionWatermarkIcons =
+          jsonData[key].displayVersionWatermarkIcons
         if (displayVersionWatermarkIcons) {
           const dvwi: any[] = []
 
-            for (const watermark in displayVersionWatermarkIcons) {
-                if (!watermark) {
-                    continue
-                }
-                dvwi.push(getRepeatStringIndex(RepeatStringsName.IconWaterMark, stripImageUrl(watermark)))
+          for (const watermark in displayVersionWatermarkIcons) {
+            if (!watermark) {
+              continue
             }
+            dvwi.push(
+              getRepeatStringIndex(
+                RepeatStringsName.IconWaterMark,
+                stripImageUrl(watermark)
+              )
+            )
+          }
 
-            if (dvwi.length > 0) {
-                item.dvwi = dvwi
-            }
+          if (dvwi.length > 0) {
+            item.dvwi = dvwi
+          }
         }
       }
 
       /// Stats
       var stats = jsonData[key].stats
       if (stats) {
+        const st: any = {}
 
-          const st: any = {}
+        const itemStats = stats.stats
 
-          const itemStats = stats.stats
+        const s: any = {}
+        for (const key in itemStats) {
+          s[getRepeatStringIndex(RepeatStringsName.StatHash, key)] =
+            itemStats[key].value
+        }
 
-          const s: any = {}
-          for (const key in itemStats) {
-              s[getRepeatStringIndex(RepeatStringsName.StatHash, key)] = itemStats[key].value
-          }
-         
-          if (Object.keys(s).length > 0) {
-              st.s = s
-          }
+        if (Object.keys(s).length > 0) {
+          st.s = s
+        }
 
-          var statGroupHash = stats.statGroupHash
-          if (statGroupHash) {
-              st.sgs = getRepeatStringIndex(RepeatStringsName.StatGroupHash, statGroupHash)
-          }
+        var statGroupHash = stats.statGroupHash
+        if (statGroupHash) {
+          st.sgs = getRepeatStringIndex(
+            RepeatStringsName.StatGroupHash,
+            statGroupHash
+          )
+        }
 
-          if (Object.keys(st).length > 0) {
-              item.st = st
-          }
+        if (Object.keys(st).length > 0) {
+          item.st = st
+        }
       }
 
       var previewVendorHash = jsonData[key].preview?.previewVendorHash
 
       if (previewVendorHash) {
-          const p = previewVendorHash
-          if (p) {
-              item.pv = p
-          }
+        const p = previewVendorHash
+        if (p) {
+          item.pv = p
+        }
       }
 
       /// setData
       const setData = jsonData[key].setData
       if (setData) {
-          const sD: any = {}
+        const sD: any = {}
 
-          const questLineName = setData.questLineName
-          if (questLineName) {
-              sD.qN = questLineName
-          }
+        const questLineName = setData.questLineName
+        if (questLineName) {
+          sD.qN = questLineName
+        }
 
-          if (sD) {
-              item.sD = sD
-          }
+        if (sD) {
+          item.sD = sD
+        }
       }
 
       const tooltipNotifications = jsonData[key].tooltipNotifications
       if (tooltipNotifications) {
-          const ttn: any[] = []
+        const ttn: any[] = []
 
-          for (const tt of tooltipNotifications) {
-              const ttString = tt.displayString
+        for (const tt of tooltipNotifications) {
+          const ttString = tt.displayString
 
-              if (ttString) {
-                  ttn.push(getRepeatStringIndex(RepeatStringsName.TooltipNotifications, ttString))
-              }
-
-              /// NOTE!!! Ishtar only uses the first tooltip so no need to keep the others?
-              /// Hmmm probably was used by some items in the detail view?
-              break
-
+          if (ttString) {
+            ttn.push(
+              getRepeatStringIndex(
+                RepeatStringsName.TooltipNotifications,
+                ttString
+              )
+            )
           }
 
-          if (ttn.length > 0) {
-              item.ttn = ttn
-          }
+          /// NOTE!!! Ishtar only uses the first tooltip so no need to keep the others?
+          /// Hmmm probably was used by some items in the detail view?
+          break
+        }
+
+        if (ttn.length > 0) {
+          item.ttn = ttn
+        }
       }
 
       /// Perks
       const perks = jsonData[key].perks
       if (perks) {
-          const ph: any[] = []
+        const ph: any[] = []
 
-          for (const perk of perks) {
-
-              const jPerk: any = {}
-              const perkHash = perk.perkHash
-              if (perkHash) {
-                  jPerk.ph = perkHash
-              }
-              var perkVisibility = perk.perkVisibility
-              if (perkVisibility) {
-                  jPerk.pv = perkVisibility
-              }
-
-              if (Object.keys(jPerk).length > 0) {
-                  ph.push(jPerk)
-              }
+        for (const perk of perks) {
+          const jPerk: any = {}
+          const perkHash = perk.perkHash
+          if (perkHash) {
+            jPerk.ph = perkHash
+          }
+          var perkVisibility = perk.perkVisibility
+          if (perkVisibility) {
+            jPerk.pv = perkVisibility
           }
 
-          if (ph.length > 0) {
-
-              item.ph = ph
+          if (Object.keys(jPerk).length > 0) {
+            ph.push(jPerk)
           }
+        }
+
+        if (ph.length > 0) {
+          item.ph = ph
+        }
       }
 
       var plug = jsonData[key].plug
       if (plug) {
+        const p: any = {}
 
-          const p: any = {}
+        const plugCategoryHash = plug?.plugCategoryHash
+        if (plugCategoryHash) {
+          p.p = getRepeatStringIndex(
+            RepeatStringsName.PlugCategoryHash,
+            plugCategoryHash
+          )
+        }
 
-          const plugCategoryHash = plug?.plugCategoryHash
-          if (plugCategoryHash) {
-              p.p = getRepeatStringIndex(RepeatStringsName.PlugCategoryHash, plugCategoryHash)
-          }
+        /// NOTE: This change breaks the existing app. All it needs to do to get the correct
+        /// PlugCategoryIdentifier is use the p.p index number to get the name from the
+        /// PlugCategoryIdentifier array in the jsonDef
+        const plugCategoryIdentifier = plug.plugCategoryIdentifier
+        if (plugCategoryIdentifier) {
+          /// Intentionally call the function but don't save the result here. The p.p index will be the same.
+          getRepeatStringIndex(
+            RepeatStringsName.PlugCategoryIdentifier,
+            plugCategoryIdentifier
+          )
+        }
 
-          /// NOTE: This change breaks the existing app. All it needs to do to get the correct
-          /// PlugCategoryIdentifier is use the p.p index number to get the name from the
-          /// PlugCategoryIdentifier array in the jsonDef
-          const plugCategoryIdentifier = plug.plugCategoryIdentifier
-          if (plugCategoryIdentifier) {
-              /// Intentionally call the function but don't save the result here. The p.p index will be the same.
-              getRepeatStringIndex(RepeatStringsName.PlugCategoryIdentifier, plugCategoryIdentifier)
-          }
+        var uiPlugLabel = plug.uiPlugLabel
+        if (uiPlugLabel) {
+          p.pl = getRepeatStringIndex(
+            RepeatStringsName.UiPlugLabel,
+            uiPlugLabel
+          )
+        }
 
-          var uiPlugLabel = plug.uiPlugLabel
-          if (uiPlugLabel) {
-              p.pl = getRepeatStringIndex(RepeatStringsName.UiPlugLabel, uiPlugLabel)
-          }
+        const insertionMaterialRequirementHash =
+          plug?.insertionMaterialRequirementHash
+        if (
+          insertionMaterialRequirementHash &&
+          insertionMaterialRequirementHash !== 0
+        ) {
+          p.im = getRepeatStringIndex(
+            RepeatStringsName.InsertionMaterialRequirementHash,
+            insertionMaterialRequirementHash
+          )
+        }
 
-          const insertionMaterialRequirementHash = plug?.insertionMaterialRequirementHash
-          if (insertionMaterialRequirementHash && insertionMaterialRequirementHash !== 0) {
-              p.im = getRepeatStringIndex(RepeatStringsName.InsertionMaterialRequirementHash, insertionMaterialRequirementHash)
-          }
-
-          if (Object.keys(p).length > 0) {
-              item.p = p
-          }
+        if (Object.keys(p).length > 0) {
+          item.p = p
+        }
       }
 
       var traitIds = jsonData[key].traitIds
       if (traitIds) {
-          const ti: any[] = []
+        const ti: any[] = []
 
-          for (const traitId of traitIds) {
-              ti.push(getRepeatStringIndex(RepeatStringsName.TraitIds, traitId))
-          }
+        for (const traitId of traitIds) {
+          ti.push(getRepeatStringIndex(RepeatStringsName.TraitIds, traitId))
+        }
 
-          if (ti.length > 0) {
-              item.tI = ti
-          }
+        if (ti.length > 0) {
+          item.tI = ti
+        }
       }
 
       /// NOTE:!!!! This changes the names of many socket properties and will break current Ishtar
       const sockets = jsonData[key].sockets
       if (sockets) {
+        const sk: any = {}
 
-          const sk: any = {}
+        const socketEntries = sockets?.socketEntries
 
-          const socketEntries = sockets?.socketEntries
+        const se: any[] = []
+        for (const socketEntry of socketEntries) {
+          const socEntry: any = {}
+          const p = socketEntry?.plugSources
 
-          const se: any[] = []
-          for (const socketEntry of socketEntries) {
-              const socEntry: any = {}
-              const p = socketEntry?.plugSources
-
-              if (p) {
-                  socEntry.p = p
-              }
-
-              const st = socketEntry?.socketTypeHash
-              if (st) {
-                  socEntry.st = getRepeatStringIndex(RepeatStringsName.SocketTypeHash, st)
-              }
-
-              const rp = socketEntry.reusablePlugSetHash
-              if (rp) {
-                  socEntry.r = getRepeatStringIndex(RepeatStringsName.ReusablePlugSetHash, rp)
-              }
-
-              const s = socketEntry.singleInitialItemHash
-              if (s && s !== 0) {
-                  socEntry.s = getRepeatStringIndex(RepeatStringsName.SingleInitialItemHash, s)
-              }
-
-              if (socEntry) {
-                  se.push(socEntry)
-              }
-
+          if (p) {
+            socEntry.p = p
           }
 
-          if (se.length > 0) {
-              sk.se = getRepeatStringIndex(RepeatStringsName.SocketEntries, JSON.stringify(se))
+          const st = socketEntry?.socketTypeHash
+          if (st) {
+            socEntry.st = getRepeatStringIndex(
+              RepeatStringsName.SocketTypeHash,
+              st
+            )
           }
 
-          const scJson: any[] = []
-          for (const socketCategory of sockets.socketCategories) {
-              const socCatEntry: any = {}
-
-              var h = socketCategory?.socketCategoryHash
-              if (h) {
-                  socCatEntry.h = getRepeatStringIndex(RepeatStringsName.SocketCategoryHash, h)
-              }
-
-              /// NOTE: In ishtar you want to Json.parse the string you get to turn it into a json array.
-              var socketIndexes = socketCategory?.socketIndexes
-              if (socketIndexes) {
-                  socCatEntry.i = getRepeatStringIndex(RepeatStringsName.SocketIndexes, JSON.stringify(socketIndexes))
-                  scJson.push(socCatEntry)
-              }
-
-          }
-          if (scJson.length > 0) {
-              /// NOTE: In ishtar you want to Json.parse the string you get to turn it into a json array.
-              sk.sc = getRepeatStringIndex(RepeatStringsName.SocketCategories, JSON.stringify(scJson))
+          const rp = socketEntry.reusablePlugSetHash
+          if (rp) {
+            socEntry.r = getRepeatStringIndex(
+              RepeatStringsName.ReusablePlugSetHash,
+              rp
+            )
           }
 
-          if (Object.keys(sk).length > 0) {
-              item.sk = sk
+          const s = socketEntry.singleInitialItemHash
+          if (s && s !== 0) {
+            socEntry.s = getRepeatStringIndex(
+              RepeatStringsName.SingleInitialItemHash,
+              s
+            )
           }
 
+          if (socEntry) {
+            se.push(socEntry)
+          }
+        }
+
+        if (se.length > 0) {
+          sk.se = getRepeatStringIndex(
+            RepeatStringsName.SocketEntries,
+            JSON.stringify(se)
+          )
+        }
+
+        const scJson: any[] = []
+        for (const socketCategory of sockets.socketCategories) {
+          const socCatEntry: any = {}
+
+          var h = socketCategory?.socketCategoryHash
+          if (h) {
+            socCatEntry.h = getRepeatStringIndex(
+              RepeatStringsName.SocketCategoryHash,
+              h
+            )
+          }
+
+          /// NOTE: In ishtar you want to Json.parse the string you get to turn it into a json array.
+          var socketIndexes = socketCategory?.socketIndexes
+          if (socketIndexes) {
+            socCatEntry.i = getRepeatStringIndex(
+              RepeatStringsName.SocketIndexes,
+              JSON.stringify(socketIndexes)
+            )
+            scJson.push(socCatEntry)
+          }
+        }
+        if (scJson.length > 0) {
+          /// NOTE: In ishtar you want to Json.parse the string you get to turn it into a json array.
+          sk.sc = getRepeatStringIndex(
+            RepeatStringsName.SocketCategories,
+            JSON.stringify(scJson)
+          )
+        }
+
+        if (Object.keys(sk).length > 0) {
+          item.sk = sk
+        }
       }
     }
     // Only add items with data
@@ -682,7 +723,7 @@ async function processJson(jsonData: JsonData): Promise<any> {
     processedData[enumName] = stringArray
   }
 
-  return processedData
+  return processedData as JSON
 }
 
 async function saveToJsonFile(data: any, filePath: string): Promise<void> {
@@ -695,17 +736,55 @@ async function saveToJsonFile(data: any, filePath: string): Promise<void> {
   }
 }
 
+async function useContentPaths(
+  jsonWorldComponentContentPaths: any
+): Promise<void> {
+  const promises: Promise<void>[] = []
+
+  for (const key in jsonWorldComponentContentPaths) {
+    const definitionUrl =
+      "https://bungie.com" +
+      jsonWorldComponentContentPaths[key].DestinyInventoryItemDefinition
+
+    promises.push(downloadAndMinifyDefinition(definitionUrl, key))
+  }
+
+  // Wait for all promises to resolve in parallel
+  await Promise.all(promises)
+}
+
+async function downloadAndMinifyDefinition(
+  definitionUrl: string,
+  key: string
+): Promise<void> {
+  console.time(`${key} download-json`)
+  const jsonData = await downloadJsonFile(definitionUrl)
+  console.timeEnd(`${key} download-json`)
+
+  console.time(`${key} parse-took:`)
+  const processedData = await processJson(jsonData)
+  console.timeEnd(`${key} parse-took:`)
+
+  const outputFilePath = `../frontend/public/json/${key}.json`
+
+  await saveToJsonFile(processedData, outputFilePath)
+
+  console.log("")
+}
+
 async function main() {
   try {
-    console.time("download-json")
-    const jsonData = await downloadJsonFile(apiUrl)
-    console.timeEnd("download-json")
+    console.time("download-manifest")
 
-    console.time("parse-took:")
-    const processedData = await processJson(jsonData)
-    console.timeEnd("parse-took:")
+    const manifestUrl = "https://www.bungie.net/Platform/Destiny2/Manifest/"
+    const jsonManifest = await downloadJsonFile(manifestUrl)
+    console.timeEnd("download-manifest")
 
-    await saveToJsonFile(processedData, outputFilePath)
+    const jsonWorldComponentContentPaths =
+      jsonManifest.Response.jsonWorldComponentContentPaths
+    console.time("total-json-parse")
+    await useContentPaths(jsonWorldComponentContentPaths)
+    console.timeEnd("total-json-parse")
   } catch (error) {
     console.error(error)
   }
