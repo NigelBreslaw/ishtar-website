@@ -40,6 +40,8 @@ enum RepeatStringsName {
 // Interface (Schema) for the DestinyItemDefinition
 interface JsonData {
   [key: string]: {
+    sockets: any
+    plug: any
     perks: any
     tooltipNotifications: any
     setData: any
@@ -534,7 +536,7 @@ async function processJson(jsonData: JsonData): Promise<any> {
                   jPerk.pv = perkVisibility
               }
 
-              if ((Object.keys(jPerk).length > 0)) {
+              if (Object.keys(jPerk).length > 0) {
                   ph.push(jPerk)
               }
           }
@@ -546,36 +548,36 @@ async function processJson(jsonData: JsonData): Promise<any> {
       }
 
       var plug = jsonData[key].plug
-      if plug {
+      if (plug) {
 
-          Json p
+          const p: any = {}
 
-          var plugCategoryHash = plug.plugCategoryHash.toString()
-          if plugCategoryHash {
-              p.p = root.getRepeatStringIndex(.PlugCategoryHash, plugCategoryHash)
+          const plugCategoryHash = plug?.plugCategoryHash
+          if (plugCategoryHash) {
+              p.p = getRepeatStringIndex(RepeatStringsName.PlugCategoryHash, plugCategoryHash)
           }
 
           /// NOTE: This change breaks the existing app. All it needs to do to get the correct
           /// PlugCategoryIdentifier is use the p.p index number to get the name from the
           /// PlugCategoryIdentifier array in the jsonDef
-          var plugCategoryIdentifier = plug.plugCategoryIdentifier.toString()
-          if plugCategoryIdentifier {
+          const plugCategoryIdentifier = plug.plugCategoryIdentifier
+          if (plugCategoryIdentifier) {
               /// Intentionally call the function but don't save the result here. The p.p index will be the same.
-              root.getRepeatStringIndex(.PlugCategoryIdentifier, plugCategoryIdentifier)
+              getRepeatStringIndex(RepeatStringsName.PlugCategoryIdentifier, plugCategoryIdentifier)
           }
 
-          var uiPlugLabel = plug.uiPlugLabel.toString()
-          if uiPlugLabel {
-              p.pl = root.getRepeatStringIndex(.UiPlugLabel, uiPlugLabel)
+          var uiPlugLabel = plug.uiPlugLabel
+          if (uiPlugLabel) {
+              p.pl = getRepeatStringIndex(RepeatStringsName.UiPlugLabel, uiPlugLabel)
           }
 
-          var insertionMaterialRequirementHash = plug.insertionMaterialRequirementHash.toString()
-          if insertionMaterialRequirementHash && insertionMaterialRequirementHash != "0" {
-              p.im = root.getRepeatStringIndex(.InsertionMaterialRequirementHash, insertionMaterialRequirementHash)
+          const insertionMaterialRequirementHash = plug?.insertionMaterialRequirementHash
+          if (insertionMaterialRequirementHash && insertionMaterialRequirementHash !== 0) {
+              p.im = getRepeatStringIndex(RepeatStringsName.InsertionMaterialRequirementHash, insertionMaterialRequirementHash)
           }
 
-          if p {
-              i.p = p
+          if (Object.keys(p).length > 0) {
+              item.p = p
           }
       }
 
@@ -592,75 +594,75 @@ async function processJson(jsonData: JsonData): Promise<any> {
           }
       }
 
-      // /// NOTE:!!!! This changes the names of many socket properties and will break current Ishtar
-      // var sockets = jsonData[key].sockets
-      // if sockets {
+      /// NOTE:!!!! This changes the names of many socket properties and will break current Ishtar
+      const sockets = jsonData[key].sockets
+      if (sockets) {
 
-      //     Json sk
+          const sk: any = {}
 
-      //     var socketEntries = sockets.socketEntries
+          const socketEntries = sockets?.socketEntries
 
-      //     Json[] se
-      //     for var socketEntry in socketEntries.toArray() {
-      //         Json socEntry
-      //         var p = socketEntry.plugSources
-      //         // System.log(socketEntry)
-      //         if p {
-      //             socEntry.p = p.toInt()
-      //         }
-      //         //socketTypeHash
-      //         //
-      //         var st = socketEntry.socketTypeHash.toString()
-      //         if st {
-      //             socEntry.st = root.getRepeatStringIndex(.SocketTypeHash, st)
-      //         }
-      //         var rp = socketEntry.reusablePlugSetHash.toString()
-      //         if rp {
-      //             socEntry.r = root.getRepeatStringIndex(.ReusablePlugSetHash, rp)
-      //         }
+          const se: any[] = []
+          for (const socketEntry of socketEntries) {
+              const socEntry: any
+              const p = socketEntry?.plugSources
 
-      //         var s = socketEntry.singleInitialItemHash.toString()
-      //         if s && s != "0" {
-      //             socEntry.s = root.getRepeatStringIndex(.SingleInitialItemHash, s)
-      //         }
+              if (p) {
+                  socEntry.p = p
+              }
 
-      //         if socEntry {
-      //             se.append(socEntry)
-      //         }
+              const st = socketEntry?.socketTypeHash
+              if (st) {
+                  socEntry.st = getRepeatStringIndex(RepeatStringsName.SocketTypeHash, st)
+              }
 
-      //     }
+              const rp = socketEntry.reusablePlugSetHash
+              if (rp) {
+                  socEntry.r = getRepeatStringIndex(RepeatStringsName.ReusablePlugSetHash, rp)
+              }
 
-      //     if se.length > 0 {
-      //         sk.se = root.getRepeatStringIndex(.SocketEntries, Json.stringify(se))
-      //     }
+              const s = socketEntry.singleInitialItemHash
+              if (s && s !== 0) {
+                  socEntry.s = getRepeatStringIndex(RepeatStringsName.SingleInitialItemHash, s)
+              }
 
-      //     Json[] scJson
-      //     for var socketCategory in sockets.socketCategories.toArray() {
-      //         Json socCatEntry
+              if (socEntry) {
+                  se.push(socEntry)
+              }
 
-      //         var h = socketCategory.socketCategoryHash.toString()
-      //         if h {
-      //             socCatEntry.h = root.getRepeatStringIndex(.SocketCategoryHash, h)
-      //         }
+          }
 
-      //         /// NOTE: In ishtar you want to Json.parse the string you get to turn it into a json array.
-      //         var socketIndexes = socketCategory.socketIndexes
-      //         if socketIndexes {
-      //             socCatEntry.i = root.getRepeatStringIndex(.SocketIndexes, Json.stringify(socketIndexes))
-      //             scJson.append(socCatEntry)
-      //         }
+          if (se.length > 0) {
+              sk.se = getRepeatStringIndex(RepeatStringsName.SocketEntries, JSON.stringify(se))
+          }
 
-      //     }
-      //     if scJson.length > 0 {
-      //         /// NOTE: In ishtar you want to Json.parse the string you get to turn it into a json array.
-      //         sk.sc = root.getRepeatStringIndex(.SocketCategories, Json.stringify(scJson))
-      //     }
+          const scJson: any[] = []
+          for (const socketCategory of sockets.socketCategories) {
+              const socCatEntry: any
 
-      //     if sk {
-      //         i.sk = sk
-      //     }
+              var h = socketCategory?.socketCategoryHash
+              if (h) {
+                  socCatEntry.h = getRepeatStringIndex(RepeatStringsName.SocketCategoryHash, h)
+              }
 
-      // }
+              /// NOTE: In ishtar you want to Json.parse the string you get to turn it into a json array.
+              var socketIndexes = socketCategory?.socketIndexes
+              if (socketIndexes) {
+                  socCatEntry.i = getRepeatStringIndex(RepeatStringsName.SocketIndexes, JSON.stringify(socketIndexes))
+                  scJson.push(socCatEntry)
+              }
+
+          }
+          if (scJson.length > 0) {
+              /// NOTE: In ishtar you want to Json.parse the string you get to turn it into a json array.
+              sk.sc = getRepeatStringIndex(RepeatStringsName.SocketCategories, JSON.stringify(scJson))
+          }
+
+          if (Object.keys(sk).length > 0) {
+              item.sk = sk
+          }
+
+      }
     }
     // Only add items with data
     if (Object.keys(item).length > 0) {
