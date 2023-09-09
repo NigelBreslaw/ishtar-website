@@ -785,6 +785,11 @@ async function main() {
     console.time("total-json-parse")
     await useContentPaths(jsonWorldComponentContentPaths)
     console.timeEnd("total-json-parse")
+
+    const time = new Date().toISOString()
+    const manifest = { version: time}
+    await saveToJsonFile(manifest, '../frontend/public/json/manifest.json')
+
   } catch (error) {
     console.error(error)
   }
