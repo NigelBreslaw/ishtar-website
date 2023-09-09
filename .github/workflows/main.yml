@@ -1,0 +1,37 @@
+name: Scheduled Update
+
+on:
+  schedule:
+    - cron: "*/10 9-17 * * 1-5" # Run every 10 minutes, Monday to Friday
+  push:
+    branches:
+      - main
+
+jobs:
+  update_and_push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: 18
+
+      - name: Run Node.js Script
+        run: node app/manifest/dist/index.js
+
+      - name: Check Exit Status
+        id: check-status
+        run: echo "Success"
+
+      - name: Commit and Push Changes
+        if: steps.check-status.outcome == 'success'
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add .
+          git commit -m "Update files"
+          git push
