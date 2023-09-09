@@ -765,7 +765,7 @@ async function downloadAndMinifyDefinition(
   const processedData = await processJson(jsonData)
   console.timeEnd(`${key} parse-took:`)
 
-  const outputFilePath = `../frontend/public/json/${key}.json`
+  const outputFilePath = `apps/frontend/public/json/${key}.json`
 
   await saveToJsonFile(processedData, outputFilePath)
 
@@ -788,7 +788,7 @@ async function main() {
 
     const time = new Date().toISOString()
     const manifest = { version: time}
-    await saveToJsonFile(manifest, '../frontend/public/json/manifest.json')
+    await saveToJsonFile(manifest, 'apps/frontend/public/json/manifest.json')
 
   } catch (error) {
     console.error(error)

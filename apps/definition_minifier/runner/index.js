@@ -551,7 +551,7 @@ function downloadAndMinifyDefinition(definitionUrl, key) {
         console.time(`${key} parse-took:`);
         const processedData = yield processJson(jsonData);
         console.timeEnd(`${key} parse-took:`);
-        const outputFilePath = `../frontend/public/json/${key}.json`;
+        const outputFilePath = `apps/frontend/public/json/${key}.json`;
         yield saveToJsonFile(processedData, outputFilePath);
         console.log("");
     });
@@ -569,7 +569,7 @@ function main() {
             console.timeEnd("total-json-parse");
             const time = new Date().toISOString();
             const manifest = { version: time };
-            yield saveToJsonFile(manifest, '../frontend/public/json/manifest.json');
+            yield saveToJsonFile(manifest, 'apps/frontend/public/json/manifest.json');
         }
         catch (error) {
             console.error(error);
