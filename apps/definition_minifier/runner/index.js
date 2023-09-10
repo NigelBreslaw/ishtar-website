@@ -37,9 +37,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const fs = __importStar(require("fs"));
 const path_1 = __importDefault(require("path"));
-// Just needed while prototyping
-const apiUrl = "https://bungie.com/common/destiny2_content/json/en/DestinyInventoryItemDefinition-b83e6d2c-3ddc-42b6-b434-565c3dc82769.json";
-const outputFilePath = "output.json";
 // Enum for all the repeatedStrings
 var RepeatStringsName;
 (function (RepeatStringsName) {
@@ -119,6 +116,7 @@ function stripImageUrl(url) {
     const shortUrl = url.substring(index + 1);
     return shortUrl;
 }
+// TODO: Update to retry a couple of times instead of failing right away
 function downloadJsonFile(url) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -133,395 +131,393 @@ function downloadJsonFile(url) {
         }
     });
 }
-function processJson(jsonData) {
+function createMiniDefinition(jsonData) {
     var _a, _b, _c, _d;
-    return __awaiter(this, void 0, void 0, function* () {
-        const processedData = {};
-        for (const key in jsonData) {
-            const item = {};
-            if (jsonData.hasOwnProperty(key)) {
-                const redacted = jsonData[key].redacted;
-                if (redacted) {
-                    item.r = 1;
+    const processedData = {};
+    for (const key in jsonData) {
+        const item = {};
+        if (jsonData.hasOwnProperty(key)) {
+            const redacted = jsonData[key].redacted;
+            if (redacted) {
+                item.r = 1;
+            }
+            const displayProperties = jsonData[key].displayProperties;
+            if (displayProperties) {
+                const name = displayProperties.name;
+                if (name) {
+                    item.n = name;
                 }
-                const displayProperties = jsonData[key].displayProperties;
-                if (displayProperties) {
-                    const name = displayProperties.name;
-                    if (name) {
-                        item.n = name;
-                    }
-                    else if (!redacted) {
+                else if (!redacted) {
+                    continue;
+                }
+                const description = displayProperties.description;
+                if (description) {
+                    item.d = getRepeatStringIndex(RepeatStringsName.Descriptions, description);
+                }
+                const icon = displayProperties.icon;
+                if (icon) {
+                    item.i = stripImageUrl(icon);
+                }
+            }
+            const secondaryIcon = jsonData[key].secondaryIcon;
+            if (secondaryIcon) {
+                item.si = stripImageUrl(secondaryIcon);
+            }
+            const secondaryOverlay = jsonData[key].secondaryOverlay;
+            if (secondaryOverlay) {
+                item.so = stripImageUrl(secondaryOverlay);
+            }
+            const secondarySpecial = jsonData[key].secondarySpecial;
+            if (secondarySpecial) {
+                item.ss = stripImageUrl(secondarySpecial);
+            }
+            const screenshot = jsonData[key].screenshot;
+            if (screenshot) {
+                item.s = stripImageUrl(screenshot);
+            }
+            const allowActions = jsonData[key].allowActions;
+            if (!allowActions) {
+                item.a = 0;
+            }
+            const nonTransferrable = jsonData[key].nonTransferrable;
+            if (nonTransferrable) {
+                item.nt = 1;
+            }
+            const equippable = jsonData[key].equippable;
+            if (equippable) {
+                item.e = 1;
+            }
+            const doesPostmasterPullHaveSideEffects = jsonData[key].doesPostmasterPullHaveSideEffects;
+            if (doesPostmasterPullHaveSideEffects) {
+                item.pm = 1;
+            }
+            const displaySource = jsonData[key].displaySource;
+            if (displaySource) {
+                item.ds = getRepeatStringIndex(RepeatStringsName.DisplaySources, displaySource);
+            }
+            const itemType = jsonData[key].itemType;
+            if (itemType) {
+                item.it = itemType;
+            }
+            const itemSubType = jsonData[key].itemSubType;
+            if (itemSubType) {
+                item.is = itemSubType;
+            }
+            const classType = jsonData[key].classType;
+            if (classType) {
+                item.c = classType;
+            }
+            const itemTypeDisplayName = jsonData[key].itemTypeDisplayName;
+            if (itemTypeDisplayName) {
+                item.itd = getRepeatStringIndex(RepeatStringsName.ItemTypeDisplayName, itemTypeDisplayName);
+            }
+            /// Values
+            const itemValues = (_a = jsonData[key].value) === null || _a === void 0 ? void 0 : _a.itemValue;
+            if (itemValues) {
+                const v = [];
+                for (const itemValue of itemValues) {
+                    const val = {};
+                    const itemHash = itemValue.itemHash;
+                    if (itemHash === 0) {
                         continue;
                     }
-                    const description = displayProperties.description;
-                    if (description) {
-                        item.d = getRepeatStringIndex(RepeatStringsName.Descriptions, description);
+                    val.ih = getRepeatStringIndex(RepeatStringsName.ItemValue, itemHash);
+                    if (itemValue.quantity > 0) {
+                        val.q = itemValue.quantity;
                     }
-                    const icon = displayProperties.icon;
-                    if (icon) {
-                        item.i = stripImageUrl(icon);
+                    if (Object.keys(val).length > 0) {
+                        v.push(val);
+                    }
+                    if (Object.keys(v).length > 0) {
+                        item.v = v;
                     }
                 }
-                const secondaryIcon = jsonData[key].secondaryIcon;
-                if (secondaryIcon) {
-                    item.si = stripImageUrl(secondaryIcon);
+            }
+            /// inventory
+            const inventory = jsonData[key].inventory;
+            if (inventory) {
+                const tierType = inventory === null || inventory === void 0 ? void 0 : inventory.tierType;
+                if (tierType) {
+                    item.t = tierType;
                 }
-                const secondaryOverlay = jsonData[key].secondaryOverlay;
-                if (secondaryOverlay) {
-                    item.so = stripImageUrl(secondaryOverlay);
+                const bucketTypeHash = inventory === null || inventory === void 0 ? void 0 : inventory.bucketTypeHash;
+                if (bucketTypeHash) {
+                    item.b = getRepeatStringIndex(RepeatStringsName.BucketTypeHash, bucketTypeHash);
                 }
-                const secondarySpecial = jsonData[key].secondarySpecial;
-                if (secondarySpecial) {
-                    item.ss = stripImageUrl(secondarySpecial);
+                const stackUniqueLabel = inventory === null || inventory === void 0 ? void 0 : inventory.stackUniqueLabel;
+                if (stackUniqueLabel) {
+                    item.su = getRepeatStringIndex(RepeatStringsName.StackUniqueLabel, stackUniqueLabel);
                 }
-                const screenshot = jsonData[key].screenshot;
-                if (screenshot) {
-                    item.s = stripImageUrl(screenshot);
+                const expirationTooltip = inventory === null || inventory === void 0 ? void 0 : inventory.expirationTooltip;
+                if (expirationTooltip) {
+                    item.et = getRepeatStringIndex(RepeatStringsName.ExpirationTooltip, expirationTooltip);
                 }
-                const allowActions = jsonData[key].allowActions;
-                if (!allowActions) {
-                    item.a = 0;
+                const expiredInActivityMessage = inventory === null || inventory === void 0 ? void 0 : inventory.expiredInActivityMessage;
+                if (expiredInActivityMessage) {
+                    item.em = getRepeatStringIndex(RepeatStringsName.ExpiredInActivityMessage, expiredInActivityMessage);
                 }
-                const nonTransferrable = jsonData[key].nonTransferrable;
-                if (nonTransferrable) {
-                    item.nt = 1;
+                const maxStackSize = inventory === null || inventory === void 0 ? void 0 : inventory.maxStackSize;
+                if (maxStackSize) {
+                    item.m = maxStackSize;
                 }
-                const equippable = jsonData[key].equippable;
-                if (equippable) {
-                    item.e = 1;
+            }
+            const investmentStats = jsonData[key].investmentStats;
+            if (investmentStats) {
+                const iv = {};
+                for (const stat of investmentStats) {
+                    const value = stat.value;
+                    if (value > 0) {
+                        const statTypeHash = stat.statTypeHash;
+                        iv[statTypeHash] = value;
+                    }
                 }
-                const doesPostmasterPullHaveSideEffects = jsonData[key].doesPostmasterPullHaveSideEffects;
-                if (doesPostmasterPullHaveSideEffects) {
-                    item.pm = 1;
+                if (Object.keys(iv).length > 0) {
+                    item.iv = iv;
                 }
-                const displaySource = jsonData[key].displaySource;
-                if (displaySource) {
-                    item.ds = getRepeatStringIndex(RepeatStringsName.DisplaySources, displaySource);
+            }
+            const damageTypeHashes = jsonData[key].damageTypeHashes;
+            if (damageTypeHashes) {
+                const dt = [];
+                for (const damageHash of damageTypeHashes) {
+                    dt.push(getRepeatStringIndex(RepeatStringsName.DamageTypeHashes, damageHash));
                 }
-                const itemType = jsonData[key].itemType;
-                if (itemType) {
-                    item.it = itemType;
+                if (dt.length > 0) {
+                    item.dt = dt;
                 }
-                const itemSubType = jsonData[key].itemSubType;
-                if (itemSubType) {
-                    item.is = itemSubType;
+            }
+            ///equipping block?
+            const ammoType = (_b = jsonData[key].equippingBlock) === null || _b === void 0 ? void 0 : _b.ammoType;
+            if (ammoType) {
+                item.at = ammoType;
+            }
+            const breakerType = jsonData[key].breakerType;
+            if (breakerType) {
+                item.bt = breakerType;
+            }
+            /// Is this needed any more?
+            const talentGridHash = (_c = jsonData[key].talentGrid) === null || _c === void 0 ? void 0 : _c.talentGridHash;
+            if (talentGridHash && talentGridHash !== 0) {
+                item.th = getRepeatStringIndex(RepeatStringsName.TalentGridHash, talentGridHash);
+            }
+            const uiItemDisplayStyle = jsonData[key].uiItemDisplayStyle;
+            if (uiItemDisplayStyle) {
+                item.ids = getRepeatStringIndex(RepeatStringsName.UiItemDisplayStyle, uiItemDisplayStyle);
+            }
+            const iconWatermark = jsonData[key].iconWatermark;
+            if (iconWatermark) {
+                item.iw = getRepeatStringIndex(RepeatStringsName.IconWaterMark, stripImageUrl(iconWatermark));
+            }
+            // Quality
+            const quality = jsonData[key].quality;
+            if (quality) {
+                const versions = quality.versions;
+                if (versions) {
+                    const qv = [];
+                    for (const version of versions) {
+                        qv.push(getRepeatStringIndex(RepeatStringsName.Versions, version.powerCapHash));
+                    }
+                    if (qv.length > 0) {
+                        item.qv = qv;
+                    }
                 }
-                const classType = jsonData[key].classType;
-                if (classType) {
-                    item.c = classType;
-                }
-                const itemTypeDisplayName = jsonData[key].itemTypeDisplayName;
-                if (itemTypeDisplayName) {
-                    item.itd = getRepeatStringIndex(RepeatStringsName.ItemTypeDisplayName, itemTypeDisplayName);
-                }
-                /// Values
-                const itemValues = (_a = jsonData[key].value) === null || _a === void 0 ? void 0 : _a.itemValue;
-                if (itemValues) {
-                    const v = [];
-                    for (const itemValue of itemValues) {
-                        const val = {};
-                        const itemHash = itemValue.itemHash;
-                        if (itemHash === 0) {
+                const displayVersionWatermarkIcons = jsonData[key].displayVersionWatermarkIcons;
+                if (displayVersionWatermarkIcons) {
+                    const dvwi = [];
+                    for (const watermark in displayVersionWatermarkIcons) {
+                        if (!watermark) {
                             continue;
                         }
-                        val.ih = getRepeatStringIndex(RepeatStringsName.ItemValue, itemHash);
-                        if (itemValue.quantity > 0) {
-                            val.q = itemValue.quantity;
-                        }
-                        if (Object.keys(val).length > 0) {
-                            v.push(val);
-                        }
-                        if (Object.keys(v).length > 0) {
-                            item.v = v;
-                        }
+                        dvwi.push(getRepeatStringIndex(RepeatStringsName.IconWaterMark, stripImageUrl(watermark)));
+                    }
+                    if (dvwi.length > 0) {
+                        item.dvwi = dvwi;
                     }
                 }
-                /// inventory
-                const inventory = jsonData[key].inventory;
-                if (inventory) {
-                    const tierType = inventory === null || inventory === void 0 ? void 0 : inventory.tierType;
-                    if (tierType) {
-                        item.t = tierType;
+            }
+            /// Stats
+            var stats = jsonData[key].stats;
+            if (stats) {
+                const st = {};
+                const itemStats = stats.stats;
+                const s = {};
+                for (const key in itemStats) {
+                    s[getRepeatStringIndex(RepeatStringsName.StatHash, key)] =
+                        itemStats[key].value;
+                }
+                if (Object.keys(s).length > 0) {
+                    st.s = s;
+                }
+                var statGroupHash = stats.statGroupHash;
+                if (statGroupHash) {
+                    st.sgs = getRepeatStringIndex(RepeatStringsName.StatGroupHash, statGroupHash);
+                }
+                if (Object.keys(st).length > 0) {
+                    item.st = st;
+                }
+            }
+            var previewVendorHash = (_d = jsonData[key].preview) === null || _d === void 0 ? void 0 : _d.previewVendorHash;
+            if (previewVendorHash) {
+                const p = previewVendorHash;
+                if (p) {
+                    item.pv = p;
+                }
+            }
+            /// setData
+            const setData = jsonData[key].setData;
+            if (setData) {
+                const sD = {};
+                const questLineName = setData.questLineName;
+                if (questLineName) {
+                    sD.qN = questLineName;
+                }
+                if (sD) {
+                    item.sD = sD;
+                }
+            }
+            const tooltipNotifications = jsonData[key].tooltipNotifications;
+            if (tooltipNotifications) {
+                const ttn = [];
+                for (const tt of tooltipNotifications) {
+                    const ttString = tt.displayString;
+                    if (ttString) {
+                        ttn.push(getRepeatStringIndex(RepeatStringsName.TooltipNotifications, ttString));
                     }
-                    const bucketTypeHash = inventory === null || inventory === void 0 ? void 0 : inventory.bucketTypeHash;
-                    if (bucketTypeHash) {
-                        item.b = getRepeatStringIndex(RepeatStringsName.BucketTypeHash, bucketTypeHash);
+                    /// NOTE!!! Ishtar only uses the first tooltip so no need to keep the others?
+                    /// Hmmm probably was used by some items in the detail view?
+                    break;
+                }
+                if (ttn.length > 0) {
+                    item.ttn = ttn;
+                }
+            }
+            /// Perks
+            const perks = jsonData[key].perks;
+            if (perks) {
+                const ph = [];
+                for (const perk of perks) {
+                    const jPerk = {};
+                    const perkHash = perk.perkHash;
+                    if (perkHash) {
+                        jPerk.ph = perkHash;
                     }
-                    const stackUniqueLabel = inventory === null || inventory === void 0 ? void 0 : inventory.stackUniqueLabel;
-                    if (stackUniqueLabel) {
-                        item.su = getRepeatStringIndex(RepeatStringsName.StackUniqueLabel, stackUniqueLabel);
+                    var perkVisibility = perk.perkVisibility;
+                    if (perkVisibility) {
+                        jPerk.pv = perkVisibility;
                     }
-                    const expirationTooltip = inventory === null || inventory === void 0 ? void 0 : inventory.expirationTooltip;
-                    if (expirationTooltip) {
-                        item.et = getRepeatStringIndex(RepeatStringsName.ExpirationTooltip, expirationTooltip);
-                    }
-                    const expiredInActivityMessage = inventory === null || inventory === void 0 ? void 0 : inventory.expiredInActivityMessage;
-                    if (expiredInActivityMessage) {
-                        item.em = getRepeatStringIndex(RepeatStringsName.ExpiredInActivityMessage, expiredInActivityMessage);
-                    }
-                    const maxStackSize = inventory === null || inventory === void 0 ? void 0 : inventory.maxStackSize;
-                    if (maxStackSize) {
-                        item.m = maxStackSize;
+                    if (Object.keys(jPerk).length > 0) {
+                        ph.push(jPerk);
                     }
                 }
-                const investmentStats = jsonData[key].investmentStats;
-                if (investmentStats) {
-                    const iv = {};
-                    for (const stat of investmentStats) {
-                        const value = stat.value;
-                        if (value > 0) {
-                            const statTypeHash = stat.statTypeHash;
-                            iv[statTypeHash] = value;
-                        }
-                    }
-                    if (Object.keys(iv).length > 0) {
-                        item.iv = iv;
-                    }
+                if (ph.length > 0) {
+                    item.ph = ph;
                 }
-                const damageTypeHashes = jsonData[key].damageTypeHashes;
-                if (damageTypeHashes) {
-                    const dt = [];
-                    for (const damageHash of damageTypeHashes) {
-                        dt.push(getRepeatStringIndex(RepeatStringsName.DamageTypeHashes, damageHash));
-                    }
-                    if (dt.length > 0) {
-                        item.dt = dt;
-                    }
+            }
+            var plug = jsonData[key].plug;
+            if (plug) {
+                const p = {};
+                const plugCategoryHash = plug === null || plug === void 0 ? void 0 : plug.plugCategoryHash;
+                if (plugCategoryHash) {
+                    p.p = getRepeatStringIndex(RepeatStringsName.PlugCategoryHash, plugCategoryHash);
                 }
-                ///equipping block?
-                const ammoType = (_b = jsonData[key].equippingBlock) === null || _b === void 0 ? void 0 : _b.ammoType;
-                if (ammoType) {
-                    item.at = ammoType;
+                /// NOTE: This change breaks the existing app. All it needs to do to get the correct
+                /// PlugCategoryIdentifier is use the p.p index number to get the name from the
+                /// PlugCategoryIdentifier array in the jsonDef
+                const plugCategoryIdentifier = plug.plugCategoryIdentifier;
+                if (plugCategoryIdentifier) {
+                    /// Intentionally call the function but don't save the result here. The p.p index will be the same.
+                    getRepeatStringIndex(RepeatStringsName.PlugCategoryIdentifier, plugCategoryIdentifier);
                 }
-                const breakerType = jsonData[key].breakerType;
-                if (breakerType) {
-                    item.bt = breakerType;
+                var uiPlugLabel = plug.uiPlugLabel;
+                if (uiPlugLabel) {
+                    p.pl = getRepeatStringIndex(RepeatStringsName.UiPlugLabel, uiPlugLabel);
                 }
-                /// Is this needed any more?
-                const talentGridHash = (_c = jsonData[key].talentGrid) === null || _c === void 0 ? void 0 : _c.talentGridHash;
-                if (talentGridHash && talentGridHash !== 0) {
-                    item.th = getRepeatStringIndex(RepeatStringsName.TalentGridHash, talentGridHash);
+                const insertionMaterialRequirementHash = plug === null || plug === void 0 ? void 0 : plug.insertionMaterialRequirementHash;
+                if (insertionMaterialRequirementHash &&
+                    insertionMaterialRequirementHash !== 0) {
+                    p.im = getRepeatStringIndex(RepeatStringsName.InsertionMaterialRequirementHash, insertionMaterialRequirementHash);
                 }
-                const uiItemDisplayStyle = jsonData[key].uiItemDisplayStyle;
-                if (uiItemDisplayStyle) {
-                    item.ids = getRepeatStringIndex(RepeatStringsName.UiItemDisplayStyle, uiItemDisplayStyle);
+                if (Object.keys(p).length > 0) {
+                    item.p = p;
                 }
-                const iconWatermark = jsonData[key].iconWatermark;
-                if (iconWatermark) {
-                    item.iw = getRepeatStringIndex(RepeatStringsName.IconWaterMark, stripImageUrl(iconWatermark));
+            }
+            var traitIds = jsonData[key].traitIds;
+            if (traitIds) {
+                const ti = [];
+                for (const traitId of traitIds) {
+                    ti.push(getRepeatStringIndex(RepeatStringsName.TraitIds, traitId));
                 }
-                // Quality
-                const quality = jsonData[key].quality;
-                if (quality) {
-                    const versions = quality.versions;
-                    if (versions) {
-                        const qv = [];
-                        for (const version of versions) {
-                            qv.push(getRepeatStringIndex(RepeatStringsName.Versions, version.powerCapHash));
-                        }
-                        if (qv.length > 0) {
-                            item.qv = qv;
-                        }
-                    }
-                    const displayVersionWatermarkIcons = jsonData[key].displayVersionWatermarkIcons;
-                    if (displayVersionWatermarkIcons) {
-                        const dvwi = [];
-                        for (const watermark in displayVersionWatermarkIcons) {
-                            if (!watermark) {
-                                continue;
-                            }
-                            dvwi.push(getRepeatStringIndex(RepeatStringsName.IconWaterMark, stripImageUrl(watermark)));
-                        }
-                        if (dvwi.length > 0) {
-                            item.dvwi = dvwi;
-                        }
-                    }
+                if (ti.length > 0) {
+                    item.tI = ti;
                 }
-                /// Stats
-                var stats = jsonData[key].stats;
-                if (stats) {
-                    const st = {};
-                    const itemStats = stats.stats;
-                    const s = {};
-                    for (const key in itemStats) {
-                        s[getRepeatStringIndex(RepeatStringsName.StatHash, key)] =
-                            itemStats[key].value;
-                    }
-                    if (Object.keys(s).length > 0) {
-                        st.s = s;
-                    }
-                    var statGroupHash = stats.statGroupHash;
-                    if (statGroupHash) {
-                        st.sgs = getRepeatStringIndex(RepeatStringsName.StatGroupHash, statGroupHash);
-                    }
-                    if (Object.keys(st).length > 0) {
-                        item.st = st;
-                    }
-                }
-                var previewVendorHash = (_d = jsonData[key].preview) === null || _d === void 0 ? void 0 : _d.previewVendorHash;
-                if (previewVendorHash) {
-                    const p = previewVendorHash;
+            }
+            /// NOTE:!!!! This changes the names of many socket properties and will break current Ishtar
+            const sockets = jsonData[key].sockets;
+            if (sockets) {
+                const sk = {};
+                const socketEntries = sockets === null || sockets === void 0 ? void 0 : sockets.socketEntries;
+                const se = [];
+                for (const socketEntry of socketEntries) {
+                    const socEntry = {};
+                    const p = socketEntry === null || socketEntry === void 0 ? void 0 : socketEntry.plugSources;
                     if (p) {
-                        item.pv = p;
+                        socEntry.p = p;
+                    }
+                    const st = socketEntry === null || socketEntry === void 0 ? void 0 : socketEntry.socketTypeHash;
+                    if (st) {
+                        socEntry.st = getRepeatStringIndex(RepeatStringsName.SocketTypeHash, st);
+                    }
+                    const rp = socketEntry.reusablePlugSetHash;
+                    if (rp) {
+                        socEntry.r = getRepeatStringIndex(RepeatStringsName.ReusablePlugSetHash, rp);
+                    }
+                    const s = socketEntry.singleInitialItemHash;
+                    if (s && s !== 0) {
+                        socEntry.s = getRepeatStringIndex(RepeatStringsName.SingleInitialItemHash, s);
+                    }
+                    if (socEntry) {
+                        se.push(socEntry);
                     }
                 }
-                /// setData
-                const setData = jsonData[key].setData;
-                if (setData) {
-                    const sD = {};
-                    const questLineName = setData.questLineName;
-                    if (questLineName) {
-                        sD.qN = questLineName;
+                if (se.length > 0) {
+                    sk.se = getRepeatStringIndex(RepeatStringsName.SocketEntries, JSON.stringify(se));
+                }
+                const scJson = [];
+                for (const socketCategory of sockets.socketCategories) {
+                    const socCatEntry = {};
+                    var h = socketCategory === null || socketCategory === void 0 ? void 0 : socketCategory.socketCategoryHash;
+                    if (h) {
+                        socCatEntry.h = getRepeatStringIndex(RepeatStringsName.SocketCategoryHash, h);
                     }
-                    if (sD) {
-                        item.sD = sD;
+                    /// NOTE: In ishtar you want to Json.parse the string you get to turn it into a json array.
+                    var socketIndexes = socketCategory === null || socketCategory === void 0 ? void 0 : socketCategory.socketIndexes;
+                    if (socketIndexes) {
+                        socCatEntry.i = getRepeatStringIndex(RepeatStringsName.SocketIndexes, JSON.stringify(socketIndexes));
+                        scJson.push(socCatEntry);
                     }
                 }
-                const tooltipNotifications = jsonData[key].tooltipNotifications;
-                if (tooltipNotifications) {
-                    const ttn = [];
-                    for (const tt of tooltipNotifications) {
-                        const ttString = tt.displayString;
-                        if (ttString) {
-                            ttn.push(getRepeatStringIndex(RepeatStringsName.TooltipNotifications, ttString));
-                        }
-                        /// NOTE!!! Ishtar only uses the first tooltip so no need to keep the others?
-                        /// Hmmm probably was used by some items in the detail view?
-                        break;
-                    }
-                    if (ttn.length > 0) {
-                        item.ttn = ttn;
-                    }
+                if (scJson.length > 0) {
+                    /// NOTE: In ishtar you want to Json.parse the string you get to turn it into a json array.
+                    sk.sc = getRepeatStringIndex(RepeatStringsName.SocketCategories, JSON.stringify(scJson));
                 }
-                /// Perks
-                const perks = jsonData[key].perks;
-                if (perks) {
-                    const ph = [];
-                    for (const perk of perks) {
-                        const jPerk = {};
-                        const perkHash = perk.perkHash;
-                        if (perkHash) {
-                            jPerk.ph = perkHash;
-                        }
-                        var perkVisibility = perk.perkVisibility;
-                        if (perkVisibility) {
-                            jPerk.pv = perkVisibility;
-                        }
-                        if (Object.keys(jPerk).length > 0) {
-                            ph.push(jPerk);
-                        }
-                    }
-                    if (ph.length > 0) {
-                        item.ph = ph;
-                    }
-                }
-                var plug = jsonData[key].plug;
-                if (plug) {
-                    const p = {};
-                    const plugCategoryHash = plug === null || plug === void 0 ? void 0 : plug.plugCategoryHash;
-                    if (plugCategoryHash) {
-                        p.p = getRepeatStringIndex(RepeatStringsName.PlugCategoryHash, plugCategoryHash);
-                    }
-                    /// NOTE: This change breaks the existing app. All it needs to do to get the correct
-                    /// PlugCategoryIdentifier is use the p.p index number to get the name from the
-                    /// PlugCategoryIdentifier array in the jsonDef
-                    const plugCategoryIdentifier = plug.plugCategoryIdentifier;
-                    if (plugCategoryIdentifier) {
-                        /// Intentionally call the function but don't save the result here. The p.p index will be the same.
-                        getRepeatStringIndex(RepeatStringsName.PlugCategoryIdentifier, plugCategoryIdentifier);
-                    }
-                    var uiPlugLabel = plug.uiPlugLabel;
-                    if (uiPlugLabel) {
-                        p.pl = getRepeatStringIndex(RepeatStringsName.UiPlugLabel, uiPlugLabel);
-                    }
-                    const insertionMaterialRequirementHash = plug === null || plug === void 0 ? void 0 : plug.insertionMaterialRequirementHash;
-                    if (insertionMaterialRequirementHash &&
-                        insertionMaterialRequirementHash !== 0) {
-                        p.im = getRepeatStringIndex(RepeatStringsName.InsertionMaterialRequirementHash, insertionMaterialRequirementHash);
-                    }
-                    if (Object.keys(p).length > 0) {
-                        item.p = p;
-                    }
-                }
-                var traitIds = jsonData[key].traitIds;
-                if (traitIds) {
-                    const ti = [];
-                    for (const traitId of traitIds) {
-                        ti.push(getRepeatStringIndex(RepeatStringsName.TraitIds, traitId));
-                    }
-                    if (ti.length > 0) {
-                        item.tI = ti;
-                    }
-                }
-                /// NOTE:!!!! This changes the names of many socket properties and will break current Ishtar
-                const sockets = jsonData[key].sockets;
-                if (sockets) {
-                    const sk = {};
-                    const socketEntries = sockets === null || sockets === void 0 ? void 0 : sockets.socketEntries;
-                    const se = [];
-                    for (const socketEntry of socketEntries) {
-                        const socEntry = {};
-                        const p = socketEntry === null || socketEntry === void 0 ? void 0 : socketEntry.plugSources;
-                        if (p) {
-                            socEntry.p = p;
-                        }
-                        const st = socketEntry === null || socketEntry === void 0 ? void 0 : socketEntry.socketTypeHash;
-                        if (st) {
-                            socEntry.st = getRepeatStringIndex(RepeatStringsName.SocketTypeHash, st);
-                        }
-                        const rp = socketEntry.reusablePlugSetHash;
-                        if (rp) {
-                            socEntry.r = getRepeatStringIndex(RepeatStringsName.ReusablePlugSetHash, rp);
-                        }
-                        const s = socketEntry.singleInitialItemHash;
-                        if (s && s !== 0) {
-                            socEntry.s = getRepeatStringIndex(RepeatStringsName.SingleInitialItemHash, s);
-                        }
-                        if (socEntry) {
-                            se.push(socEntry);
-                        }
-                    }
-                    if (se.length > 0) {
-                        sk.se = getRepeatStringIndex(RepeatStringsName.SocketEntries, JSON.stringify(se));
-                    }
-                    const scJson = [];
-                    for (const socketCategory of sockets.socketCategories) {
-                        const socCatEntry = {};
-                        var h = socketCategory === null || socketCategory === void 0 ? void 0 : socketCategory.socketCategoryHash;
-                        if (h) {
-                            socCatEntry.h = getRepeatStringIndex(RepeatStringsName.SocketCategoryHash, h);
-                        }
-                        /// NOTE: In ishtar you want to Json.parse the string you get to turn it into a json array.
-                        var socketIndexes = socketCategory === null || socketCategory === void 0 ? void 0 : socketCategory.socketIndexes;
-                        if (socketIndexes) {
-                            socCatEntry.i = getRepeatStringIndex(RepeatStringsName.SocketIndexes, JSON.stringify(socketIndexes));
-                            scJson.push(socCatEntry);
-                        }
-                    }
-                    if (scJson.length > 0) {
-                        /// NOTE: In ishtar you want to Json.parse the string you get to turn it into a json array.
-                        sk.sc = getRepeatStringIndex(RepeatStringsName.SocketCategories, JSON.stringify(scJson));
-                    }
-                    if (Object.keys(sk).length > 0) {
-                        item.sk = sk;
-                    }
+                if (Object.keys(sk).length > 0) {
+                    item.sk = sk;
                 }
             }
-            // Only add items with data
-            if (Object.keys(item).length > 0) {
-                processedData[key] = item; // Assign 'item' directly to the key
-            }
         }
-        // Add the repeatStrings to the output JSON
-        // Create an array of enum names by filtering out invalid enum values
-        const enumNames = Object.keys(RepeatStringsName).filter((key) => isNaN(Number(key)));
-        // Iterate over the enum names
-        for (const enumName of enumNames) {
-            const stringArray = repeatStrings[RepeatStringsName[enumName]];
-            processedData[enumName] = stringArray;
+        // Only add items with data
+        if (Object.keys(item).length > 0) {
+            processedData[key] = item; // Assign 'item' directly to the key
         }
-        return processedData;
-    });
+    }
+    // Add the repeatStrings to the output JSON
+    // Create an array of enum names by filtering out invalid enum values
+    const enumNames = Object.keys(RepeatStringsName).filter((key) => isNaN(Number(key)));
+    // Iterate over the enum names
+    for (const enumName of enumNames) {
+        const stringArray = repeatStrings[RepeatStringsName[enumName]];
+        processedData[enumName] = stringArray;
+    }
+    return processedData;
 }
 function saveToJsonFile(data, filePath) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -570,7 +566,7 @@ function downloadAndMinifyDefinition(definitionUrl, key) {
         const jsonData = yield downloadJsonFile(definitionUrl);
         console.timeEnd(`${key} download-json`);
         console.time(`${key} parse-took:`);
-        const processedData = yield processJson(jsonData);
+        const processedData = createMiniDefinition(jsonData);
         console.timeEnd(`${key} parse-took:`);
         const outputFilePath = path_1.default.join(__dirname, `../../frontend/public/json/${key}.json`);
         yield saveToJsonFile(processedData, outputFilePath);

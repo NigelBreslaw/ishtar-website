@@ -1,10 +1,6 @@
 import * as fs from "fs"
 import path from "path"
 
-// Just needed while prototyping
-const apiUrl =
-  "https://bungie.com/common/destiny2_content/json/en/DestinyInventoryItemDefinition-b83e6d2c-3ddc-42b6-b434-565c3dc82769.json"
-const outputFilePath = "output.json"
 
 // Enum for all the repeatedStrings
 enum RepeatStringsName {
@@ -144,6 +140,7 @@ function stripImageUrl(url: string): string {
   return shortUrl
 }
 
+// TODO: Update to retry a couple of times instead of failing right away
 async function downloadJsonFile(url: string): Promise<any> {
   try {
     const response = await fetch(url)
@@ -158,7 +155,8 @@ async function downloadJsonFile(url: string): Promise<any> {
   }
 }
 
-async function processJson(jsonData: JsonData): Promise<any> {
+
+function createMiniDefinition(jsonData: JsonData): JSON {
   const processedData: { [key: string]: any } = {}
 
   for (const key in jsonData) {
@@ -781,7 +779,7 @@ async function downloadAndMinifyDefinition(
   console.timeEnd(`${key} download-json`)
 
   console.time(`${key} parse-took:`)
-  const processedData = await processJson(jsonData)
+  const processedData = createMiniDefinition(jsonData)
   console.timeEnd(`${key} parse-took:`)
 
   const outputFilePath = path.join(
