@@ -341,8 +341,7 @@ function createMiniDefinition(jsonData) {
                 const itemStats = stats.stats;
                 const s = {};
                 for (const key in itemStats) {
-                    s[getRepeatStringIndex(RepeatStringsName.StatHash, key)] =
-                        itemStats[key].value;
+                    s[getRepeatStringIndex(RepeatStringsName.StatHash, key)] = itemStats[key].value;
                 }
                 if (Object.keys(s).length > 0) {
                     st.s = s;
@@ -432,8 +431,7 @@ function createMiniDefinition(jsonData) {
                     p.pl = getRepeatStringIndex(RepeatStringsName.UiPlugLabel, uiPlugLabel);
                 }
                 const insertionMaterialRequirementHash = plug === null || plug === void 0 ? void 0 : plug.insertionMaterialRequirementHash;
-                if (insertionMaterialRequirementHash &&
-                    insertionMaterialRequirementHash !== 0) {
+                if (insertionMaterialRequirementHash && insertionMaterialRequirementHash !== 0) {
                     p.im = getRepeatStringIndex(RepeatStringsName.InsertionMaterialRequirementHash, insertionMaterialRequirementHash);
                 }
                 if (Object.keys(p).length > 0) {
@@ -552,9 +550,20 @@ function useContentPaths(jsonWorldComponentContentPaths) {
     return __awaiter(this, void 0, void 0, function* () {
         const promises = [];
         for (const key in jsonWorldComponentContentPaths) {
-            const definitionUrl = "https://bungie.com" +
-                jsonWorldComponentContentPaths[key].DestinyInventoryItemDefinition;
+            const definitionUrl = "https://bungie.com" + jsonWorldComponentContentPaths[key].DestinyInventoryItemDefinition;
             promises.push(downloadAndMinifyDefinition(definitionUrl, key));
+        }
+        // Wait for all promises to resolve in parallel
+        yield Promise.all(promises);
+    });
+}
+function getFullDefinitions(jsonWorldComponentContentPaths) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const promises = [];
+        for (const key in jsonWorldComponentContentPaths) {
+            const definitionUrl = "https://bungie.com" + jsonWorldComponentContentPaths[key].DestinyInventoryItemDefinition;
+            const jsonData = yield downloadJsonFile(definitionUrl);
+            yield saveToJsonFile(jsonData, `full-sized-def-${key}.json`);
         }
         // Wait for all promises to resolve in parallel
         yield Promise.all(promises);
@@ -588,33 +597,33 @@ function isNewManifest(jsonManifest) {
 }
 function main() {
     return __awaiter(this, void 0, void 0, function* () {
-        try {
-            console.time("download-manifest");
-            const manifestUrl = "https://www.bungie.net/Platform/Destiny2/Manifest/";
-            const jsonManifest = yield downloadJsonFile(manifestUrl);
-            const isNew = yield isNewManifest(jsonManifest);
-            if (isNew) {
-                const jsonManifest = yield downloadJsonFile(manifestUrl);
-                console.timeEnd("download-manifest");
-                const jsonWorldComponentContentPaths = jsonManifest.Response.jsonWorldComponentContentPaths;
-                console.time("total-json-parse");
-                yield useContentPaths(jsonWorldComponentContentPaths);
-                console.timeEnd("total-json-parse");
-                const time = new Date().toISOString();
-                const manifest = { version: time };
-                const savePath = path_1.default.join(__dirname, `../../frontend/public/json/manifest.json`);
-                yield saveToJsonFile(manifest, savePath);
-                const manifestSavePath = path_1.default.join(__dirname, "../runner/bungieManifest.json");
-                yield saveToJsonFile(jsonManifest, manifestSavePath);
-            }
-            else {
-                console.log("No new manifest detected");
-                process.exit(1);
-            }
-        }
-        catch (error) {
-            console.error(error);
-        }
+        // try {
+        console.time("download-manifest");
+        const manifestUrl = "https://www.bungie.net/Platform/Destiny2/Manifest/";
+        const jsonManifest = yield downloadJsonFile(manifestUrl);
+        const jsonWorldComponentContentPaths = jsonManifest.Response.jsonWorldComponentContentPaths;
+        yield getFullDefinitions(jsonWorldComponentContentPaths);
+        // const isNew = await isNewManifest(jsonManifest)
+        // if (isNew) {
+        //   const jsonManifest = await downloadJsonFile(manifestUrl)
+        //   console.timeEnd("download-manifest")
+        //   const jsonWorldComponentContentPaths = jsonManifest.Response.jsonWorldComponentContentPaths
+        //   console.time("total-json-parse")
+        //   await useContentPaths(jsonWorldComponentContentPaths)
+        //   console.timeEnd("total-json-parse")
+        //   const time = new Date().toISOString()
+        //   const manifest = { version: time }
+        //   const savePath = path.join(__dirname, `../../frontend/public/json/manifest.json`)
+        //   await saveToJsonFile(manifest, savePath)
+        //   const manifestSavePath = path.join(__dirname, "../runner/bungieManifest.json")
+        //   await saveToJsonFile(jsonManifest, manifestSavePath)
+        // } else {
+        //   console.log("No new manifest detected")
+        //   process.exit(1)
+        //   }
+        // } catch (error) {
+        //   console.error(error)
+        // }
     });
 }
 main();

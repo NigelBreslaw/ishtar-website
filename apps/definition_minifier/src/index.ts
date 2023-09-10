@@ -1,7 +1,6 @@
 import * as fs from "fs"
 import path from "path"
 
-
 // Enum for all the repeatedStrings
 enum RepeatStringsName {
   Descriptions,
@@ -155,7 +154,6 @@ async function downloadJsonFile(url: string): Promise<any> {
   }
 }
 
-
 function createMiniDefinition(jsonData: JsonData): JSON {
   const processedData: { [key: string]: any } = {}
 
@@ -178,10 +176,7 @@ function createMiniDefinition(jsonData: JsonData): JSON {
 
         const description = displayProperties.description
         if (description) {
-          item.d = getRepeatStringIndex(
-            RepeatStringsName.Descriptions,
-            description
-          )
+          item.d = getRepeatStringIndex(RepeatStringsName.Descriptions, description)
         }
 
         const icon = displayProperties.icon
@@ -224,18 +219,14 @@ function createMiniDefinition(jsonData: JsonData): JSON {
         item.e = 1
       }
 
-      const doesPostmasterPullHaveSideEffects =
-        jsonData[key].doesPostmasterPullHaveSideEffects
+      const doesPostmasterPullHaveSideEffects = jsonData[key].doesPostmasterPullHaveSideEffects
       if (doesPostmasterPullHaveSideEffects) {
         item.pm = 1
       }
 
       const displaySource = jsonData[key].displaySource
       if (displaySource) {
-        item.ds = getRepeatStringIndex(
-          RepeatStringsName.DisplaySources,
-          displaySource
-        )
+        item.ds = getRepeatStringIndex(RepeatStringsName.DisplaySources, displaySource)
       }
 
       const itemType = jsonData[key].itemType
@@ -255,10 +246,7 @@ function createMiniDefinition(jsonData: JsonData): JSON {
 
       const itemTypeDisplayName = jsonData[key].itemTypeDisplayName
       if (itemTypeDisplayName) {
-        item.itd = getRepeatStringIndex(
-          RepeatStringsName.ItemTypeDisplayName,
-          itemTypeDisplayName
-        )
+        item.itd = getRepeatStringIndex(RepeatStringsName.ItemTypeDisplayName, itemTypeDisplayName)
       }
 
       /// Values
@@ -300,34 +288,22 @@ function createMiniDefinition(jsonData: JsonData): JSON {
 
         const bucketTypeHash = inventory?.bucketTypeHash
         if (bucketTypeHash) {
-          item.b = getRepeatStringIndex(
-            RepeatStringsName.BucketTypeHash,
-            bucketTypeHash
-          )
+          item.b = getRepeatStringIndex(RepeatStringsName.BucketTypeHash, bucketTypeHash)
         }
 
         const stackUniqueLabel = inventory?.stackUniqueLabel
         if (stackUniqueLabel) {
-          item.su = getRepeatStringIndex(
-            RepeatStringsName.StackUniqueLabel,
-            stackUniqueLabel
-          )
+          item.su = getRepeatStringIndex(RepeatStringsName.StackUniqueLabel, stackUniqueLabel)
         }
 
         const expirationTooltip = inventory?.expirationTooltip
         if (expirationTooltip) {
-          item.et = getRepeatStringIndex(
-            RepeatStringsName.ExpirationTooltip,
-            expirationTooltip
-          )
+          item.et = getRepeatStringIndex(RepeatStringsName.ExpirationTooltip, expirationTooltip)
         }
 
         const expiredInActivityMessage = inventory?.expiredInActivityMessage
         if (expiredInActivityMessage) {
-          item.em = getRepeatStringIndex(
-            RepeatStringsName.ExpiredInActivityMessage,
-            expiredInActivityMessage
-          )
+          item.em = getRepeatStringIndex(RepeatStringsName.ExpiredInActivityMessage, expiredInActivityMessage)
         }
 
         const maxStackSize = inventory?.maxStackSize
@@ -360,9 +336,7 @@ function createMiniDefinition(jsonData: JsonData): JSON {
         const dt: any[] = []
 
         for (const damageHash of damageTypeHashes) {
-          dt.push(
-            getRepeatStringIndex(RepeatStringsName.DamageTypeHashes, damageHash)
-          )
+          dt.push(getRepeatStringIndex(RepeatStringsName.DamageTypeHashes, damageHash))
         }
 
         if (dt.length > 0) {
@@ -384,26 +358,17 @@ function createMiniDefinition(jsonData: JsonData): JSON {
       /// Is this needed any more?
       const talentGridHash = jsonData[key].talentGrid?.talentGridHash
       if (talentGridHash && talentGridHash !== 0) {
-        item.th = getRepeatStringIndex(
-          RepeatStringsName.TalentGridHash,
-          talentGridHash
-        )
+        item.th = getRepeatStringIndex(RepeatStringsName.TalentGridHash, talentGridHash)
       }
 
       const uiItemDisplayStyle = jsonData[key].uiItemDisplayStyle
       if (uiItemDisplayStyle) {
-        item.ids = getRepeatStringIndex(
-          RepeatStringsName.UiItemDisplayStyle,
-          uiItemDisplayStyle
-        )
+        item.ids = getRepeatStringIndex(RepeatStringsName.UiItemDisplayStyle, uiItemDisplayStyle)
       }
 
       const iconWatermark = jsonData[key].iconWatermark
       if (iconWatermark) {
-        item.iw = getRepeatStringIndex(
-          RepeatStringsName.IconWaterMark,
-          stripImageUrl(iconWatermark)
-        )
+        item.iw = getRepeatStringIndex(RepeatStringsName.IconWaterMark, stripImageUrl(iconWatermark))
       }
 
       // Quality
@@ -414,20 +379,14 @@ function createMiniDefinition(jsonData: JsonData): JSON {
         if (versions) {
           const qv: any[] = []
           for (const version of versions) {
-            qv.push(
-              getRepeatStringIndex(
-                RepeatStringsName.Versions,
-                version.powerCapHash
-              )
-            )
+            qv.push(getRepeatStringIndex(RepeatStringsName.Versions, version.powerCapHash))
           }
           if (qv.length > 0) {
             item.qv = qv
           }
         }
 
-        const displayVersionWatermarkIcons =
-          jsonData[key].displayVersionWatermarkIcons
+        const displayVersionWatermarkIcons = jsonData[key].displayVersionWatermarkIcons
         if (displayVersionWatermarkIcons) {
           const dvwi: any[] = []
 
@@ -435,12 +394,7 @@ function createMiniDefinition(jsonData: JsonData): JSON {
             if (!watermark) {
               continue
             }
-            dvwi.push(
-              getRepeatStringIndex(
-                RepeatStringsName.IconWaterMark,
-                stripImageUrl(watermark)
-              )
-            )
+            dvwi.push(getRepeatStringIndex(RepeatStringsName.IconWaterMark, stripImageUrl(watermark)))
           }
 
           if (dvwi.length > 0) {
@@ -458,8 +412,7 @@ function createMiniDefinition(jsonData: JsonData): JSON {
 
         const s: any = {}
         for (const key in itemStats) {
-          s[getRepeatStringIndex(RepeatStringsName.StatHash, key)] =
-            itemStats[key].value
+          s[getRepeatStringIndex(RepeatStringsName.StatHash, key)] = itemStats[key].value
         }
 
         if (Object.keys(s).length > 0) {
@@ -468,10 +421,7 @@ function createMiniDefinition(jsonData: JsonData): JSON {
 
         var statGroupHash = stats.statGroupHash
         if (statGroupHash) {
-          st.sgs = getRepeatStringIndex(
-            RepeatStringsName.StatGroupHash,
-            statGroupHash
-          )
+          st.sgs = getRepeatStringIndex(RepeatStringsName.StatGroupHash, statGroupHash)
         }
 
         if (Object.keys(st).length > 0) {
@@ -511,12 +461,7 @@ function createMiniDefinition(jsonData: JsonData): JSON {
           const ttString = tt.displayString
 
           if (ttString) {
-            ttn.push(
-              getRepeatStringIndex(
-                RepeatStringsName.TooltipNotifications,
-                ttString
-              )
-            )
+            ttn.push(getRepeatStringIndex(RepeatStringsName.TooltipNotifications, ttString))
           }
 
           /// NOTE!!! Ishtar only uses the first tooltip so no need to keep the others?
@@ -561,10 +506,7 @@ function createMiniDefinition(jsonData: JsonData): JSON {
 
         const plugCategoryHash = plug?.plugCategoryHash
         if (plugCategoryHash) {
-          p.p = getRepeatStringIndex(
-            RepeatStringsName.PlugCategoryHash,
-            plugCategoryHash
-          )
+          p.p = getRepeatStringIndex(RepeatStringsName.PlugCategoryHash, plugCategoryHash)
         }
 
         /// NOTE: This change breaks the existing app. All it needs to do to get the correct
@@ -573,26 +515,16 @@ function createMiniDefinition(jsonData: JsonData): JSON {
         const plugCategoryIdentifier = plug.plugCategoryIdentifier
         if (plugCategoryIdentifier) {
           /// Intentionally call the function but don't save the result here. The p.p index will be the same.
-          getRepeatStringIndex(
-            RepeatStringsName.PlugCategoryIdentifier,
-            plugCategoryIdentifier
-          )
+          getRepeatStringIndex(RepeatStringsName.PlugCategoryIdentifier, plugCategoryIdentifier)
         }
 
         var uiPlugLabel = plug.uiPlugLabel
         if (uiPlugLabel) {
-          p.pl = getRepeatStringIndex(
-            RepeatStringsName.UiPlugLabel,
-            uiPlugLabel
-          )
+          p.pl = getRepeatStringIndex(RepeatStringsName.UiPlugLabel, uiPlugLabel)
         }
 
-        const insertionMaterialRequirementHash =
-          plug?.insertionMaterialRequirementHash
-        if (
-          insertionMaterialRequirementHash &&
-          insertionMaterialRequirementHash !== 0
-        ) {
+        const insertionMaterialRequirementHash = plug?.insertionMaterialRequirementHash
+        if (insertionMaterialRequirementHash && insertionMaterialRequirementHash !== 0) {
           p.im = getRepeatStringIndex(
             RepeatStringsName.InsertionMaterialRequirementHash,
             insertionMaterialRequirementHash
@@ -635,26 +567,17 @@ function createMiniDefinition(jsonData: JsonData): JSON {
 
           const st = socketEntry?.socketTypeHash
           if (st) {
-            socEntry.st = getRepeatStringIndex(
-              RepeatStringsName.SocketTypeHash,
-              st
-            )
+            socEntry.st = getRepeatStringIndex(RepeatStringsName.SocketTypeHash, st)
           }
 
           const rp = socketEntry.reusablePlugSetHash
           if (rp) {
-            socEntry.r = getRepeatStringIndex(
-              RepeatStringsName.ReusablePlugSetHash,
-              rp
-            )
+            socEntry.r = getRepeatStringIndex(RepeatStringsName.ReusablePlugSetHash, rp)
           }
 
           const s = socketEntry.singleInitialItemHash
           if (s && s !== 0) {
-            socEntry.s = getRepeatStringIndex(
-              RepeatStringsName.SingleInitialItemHash,
-              s
-            )
+            socEntry.s = getRepeatStringIndex(RepeatStringsName.SingleInitialItemHash, s)
           }
 
           if (socEntry) {
@@ -663,10 +586,7 @@ function createMiniDefinition(jsonData: JsonData): JSON {
         }
 
         if (se.length > 0) {
-          sk.se = getRepeatStringIndex(
-            RepeatStringsName.SocketEntries,
-            JSON.stringify(se)
-          )
+          sk.se = getRepeatStringIndex(RepeatStringsName.SocketEntries, JSON.stringify(se))
         }
 
         const scJson: any[] = []
@@ -675,28 +595,19 @@ function createMiniDefinition(jsonData: JsonData): JSON {
 
           var h = socketCategory?.socketCategoryHash
           if (h) {
-            socCatEntry.h = getRepeatStringIndex(
-              RepeatStringsName.SocketCategoryHash,
-              h
-            )
+            socCatEntry.h = getRepeatStringIndex(RepeatStringsName.SocketCategoryHash, h)
           }
 
           /// NOTE: In ishtar you want to Json.parse the string you get to turn it into a json array.
           var socketIndexes = socketCategory?.socketIndexes
           if (socketIndexes) {
-            socCatEntry.i = getRepeatStringIndex(
-              RepeatStringsName.SocketIndexes,
-              JSON.stringify(socketIndexes)
-            )
+            socCatEntry.i = getRepeatStringIndex(RepeatStringsName.SocketIndexes, JSON.stringify(socketIndexes))
             scJson.push(socCatEntry)
           }
         }
         if (scJson.length > 0) {
           /// NOTE: In ishtar you want to Json.parse the string you get to turn it into a json array.
-          sk.sc = getRepeatStringIndex(
-            RepeatStringsName.SocketCategories,
-            JSON.stringify(scJson)
-          )
+          sk.sc = getRepeatStringIndex(RepeatStringsName.SocketCategories, JSON.stringify(scJson))
         }
 
         if (Object.keys(sk).length > 0) {
@@ -753,15 +664,11 @@ function loadJsonFile(path: any): Promise<any> {
   })
 }
 
-async function useContentPaths(
-  jsonWorldComponentContentPaths: any
-): Promise<void> {
+async function useContentPaths(jsonWorldComponentContentPaths: any): Promise<void> {
   const promises: Promise<void>[] = []
 
   for (const key in jsonWorldComponentContentPaths) {
-    const definitionUrl =
-      "https://bungie.com" +
-      jsonWorldComponentContentPaths[key].DestinyInventoryItemDefinition
+    const definitionUrl = "https://bungie.com" + jsonWorldComponentContentPaths[key].DestinyInventoryItemDefinition
 
     promises.push(downloadAndMinifyDefinition(definitionUrl, key))
   }
@@ -770,10 +677,27 @@ async function useContentPaths(
   await Promise.all(promises)
 }
 
-async function downloadAndMinifyDefinition(
-  definitionUrl: string,
-  key: string
-): Promise<void> {
+// Used when investigating. This downloads and saves the original bungieItemDef files which are huge.
+async function getFullDefinitions(): Promise<void> {
+  const manifestUrl = "https://www.bungie.net/Platform/Destiny2/Manifest/"
+  const jsonManifest = await downloadJsonFile(manifestUrl)
+
+  const jsonWorldComponentContentPaths = jsonManifest.Response.jsonWorldComponentContentPaths
+
+  const promises: Promise<void>[] = []
+
+  for (const key in jsonWorldComponentContentPaths) {
+    const definitionUrl = "https://bungie.com" + jsonWorldComponentContentPaths[key].DestinyInventoryItemDefinition
+
+    const jsonData = await downloadJsonFile(definitionUrl)
+    await saveToJsonFile(jsonData, `full-sized-def-${key}.json`)
+  }
+
+  // Wait for all promises to resolve in parallel
+  await Promise.all(promises)
+}
+
+async function downloadAndMinifyDefinition(definitionUrl: string, key: string): Promise<void> {
   console.time(`${key} download-json`)
   const jsonData = await downloadJsonFile(definitionUrl)
   console.timeEnd(`${key} download-json`)
@@ -782,10 +706,7 @@ async function downloadAndMinifyDefinition(
   const processedData = createMiniDefinition(jsonData)
   console.timeEnd(`${key} parse-took:`)
 
-  const outputFilePath = path.join(
-    __dirname,
-    `../../frontend/public/json/${key}.json`
-  )
+  const outputFilePath = path.join(__dirname, `../../frontend/public/json/${key}.json`)
 
   await saveToJsonFile(processedData, outputFilePath)
 
@@ -810,35 +731,28 @@ async function main() {
 
     const manifestUrl = "https://www.bungie.net/Platform/Destiny2/Manifest/"
     const jsonManifest = await downloadJsonFile(manifestUrl)
+
     const isNew = await isNewManifest(jsonManifest)
 
     if (isNew) {
-      
       const jsonManifest = await downloadJsonFile(manifestUrl)
       console.timeEnd("download-manifest")
 
-      const jsonWorldComponentContentPaths =
-        jsonManifest.Response.jsonWorldComponentContentPaths
+      const jsonWorldComponentContentPaths = jsonManifest.Response.jsonWorldComponentContentPaths
       console.time("total-json-parse")
       await useContentPaths(jsonWorldComponentContentPaths)
       console.timeEnd("total-json-parse")
 
       const time = new Date().toISOString()
       const manifest = { version: time }
-      const savePath = path.join(
-        __dirname,
-        `../../frontend/public/json/manifest.json`
-      )
+      const savePath = path.join(__dirname, `../../frontend/public/json/manifest.json`)
       await saveToJsonFile(manifest, savePath)
 
-      const manifestSavePath = path.join(
-        __dirname,
-        "../runner/bungieManifest.json"
-      )
+      const manifestSavePath = path.join(__dirname, "../runner/bungieManifest.json")
       await saveToJsonFile(jsonManifest, manifestSavePath)
     } else {
       console.log("No new manifest detected")
-      process.exit(1);
+      process.exit(1)
     }
   } catch (error) {
     console.error(error)
