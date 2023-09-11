@@ -88,8 +88,6 @@ interface JsonData {
   }
 }
 
-
-
 // Strip off the url so only the image name is left
 // http:bungie.com/blah/blah/123.jpg -> 123.jpg
 function stripImageUrl(url: string): string {
@@ -114,50 +112,49 @@ async function downloadJsonFile(url: string): Promise<any> {
 }
 
 function createMiniDefinition(jsonData: JsonData): JSON {
-
   // Dictionary of the repeat string arrays
-const repeatStrings: Record<RepeatStringsName, string[]> = {
-  [RepeatStringsName.Descriptions]: [],
-  [RepeatStringsName.DisplaySources]: [],
-  [RepeatStringsName.ExpirationTooltip]: [],
-  [RepeatStringsName.ItemTypeDisplayName]: [],
-  [RepeatStringsName.ExpiredInActivityMessage]: [],
-  [RepeatStringsName.IconWaterMark]: [],
-  [RepeatStringsName.TraitIds]: [],
-  [RepeatStringsName.UiItemDisplayStyle]: [],
-  [RepeatStringsName.PlugCategoryIdentifier]: [],
-  [RepeatStringsName.UiPlugLabel]: [],
-  [RepeatStringsName.InsertionMaterialRequirementHash]: [],
-  [RepeatStringsName.StackUniqueLabel]: [],
-  [RepeatStringsName.BucketTypeHash]: [],
-  [RepeatStringsName.Versions]: [],
-  [RepeatStringsName.StatHash]: [],
-  [RepeatStringsName.StatGroupHash]: [],
-  [RepeatStringsName.DamageTypeHashes]: [],
-  [RepeatStringsName.ItemValue]: [],
-  [RepeatStringsName.TooltipNotifications]: [],
-  [RepeatStringsName.ReusablePlugSetHash]: [],
-  [RepeatStringsName.SingleInitialItemHash]: [],
-  [RepeatStringsName.SocketCategoryHash]: [],
-  [RepeatStringsName.SocketIndexes]: [],
-  [RepeatStringsName.SocketCategories]: [],
-  [RepeatStringsName.PlugCategoryHash]: [],
-  [RepeatStringsName.SocketEntries]: [],
-  [RepeatStringsName.SocketTypeHash]: [],
-  [RepeatStringsName.TalentGridHash]: [],
-}
-
-// Send a repeat string and get a index value back
-function getRepeatStringIndex(name: RepeatStringsName, s: string): number {
-  const index = repeatStrings[name].indexOf(s)
-  if (index === -1) {
-    repeatStrings[name].push(s)
-    return getRepeatStringIndex(name, s)
+  const repeatStrings: Record<RepeatStringsName, string[]> = {
+    [RepeatStringsName.Descriptions]: [],
+    [RepeatStringsName.DisplaySources]: [],
+    [RepeatStringsName.ExpirationTooltip]: [],
+    [RepeatStringsName.ItemTypeDisplayName]: [],
+    [RepeatStringsName.ExpiredInActivityMessage]: [],
+    [RepeatStringsName.IconWaterMark]: [],
+    [RepeatStringsName.TraitIds]: [],
+    [RepeatStringsName.UiItemDisplayStyle]: [],
+    [RepeatStringsName.PlugCategoryIdentifier]: [],
+    [RepeatStringsName.UiPlugLabel]: [],
+    [RepeatStringsName.InsertionMaterialRequirementHash]: [],
+    [RepeatStringsName.StackUniqueLabel]: [],
+    [RepeatStringsName.BucketTypeHash]: [],
+    [RepeatStringsName.Versions]: [],
+    [RepeatStringsName.StatHash]: [],
+    [RepeatStringsName.StatGroupHash]: [],
+    [RepeatStringsName.DamageTypeHashes]: [],
+    [RepeatStringsName.ItemValue]: [],
+    [RepeatStringsName.TooltipNotifications]: [],
+    [RepeatStringsName.ReusablePlugSetHash]: [],
+    [RepeatStringsName.SingleInitialItemHash]: [],
+    [RepeatStringsName.SocketCategoryHash]: [],
+    [RepeatStringsName.SocketIndexes]: [],
+    [RepeatStringsName.SocketCategories]: [],
+    [RepeatStringsName.PlugCategoryHash]: [],
+    [RepeatStringsName.SocketEntries]: [],
+    [RepeatStringsName.SocketTypeHash]: [],
+    [RepeatStringsName.TalentGridHash]: [],
   }
 
-  return index
-}
-  
+  // Send a repeat string and get a index value back
+  function getRepeatStringIndex(name: RepeatStringsName, s: string): number {
+    const index = repeatStrings[name].indexOf(s)
+    if (index === -1) {
+      repeatStrings[name].push(s)
+      return getRepeatStringIndex(name, s)
+    }
+
+    return index
+  }
+
   const processedData: { [key: string]: any } = {}
 
   const sortedDataKeys = Object.keys(jsonData).sort((a, b) => parseFloat(a) - parseFloat(b));
