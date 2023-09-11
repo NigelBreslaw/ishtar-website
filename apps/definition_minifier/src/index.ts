@@ -88,7 +88,34 @@ interface JsonData {
   }
 }
 
-// Dictionary of the repeat string arrays
+
+
+// Strip off the url so only the image name is left
+// http:bungie.com/blah/blah/123.jpg -> 123.jpg
+function stripImageUrl(url: string): string {
+  const index = url.lastIndexOf("/")
+  const shortUrl = url.substring(index + 1)
+  return shortUrl
+}
+
+// TODO: Update to retry a couple of times instead of failing right away
+async function downloadJsonFile(url: string): Promise<any> {
+  try {
+    const response = await fetch(url)
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch JSON: ${response.statusText}`)
+    }
+
+    return response.json()
+  } catch (error) {
+    throw new Error(`Failed to download JSON file: ${error}`)
+  }
+}
+
+function createMiniDefinition(jsonData: JsonData): JSON {
+
+  // Dictionary of the repeat string arrays
 const repeatStrings: Record<RepeatStringsName, string[]> = {
   [RepeatStringsName.Descriptions]: [],
   [RepeatStringsName.DisplaySources]: [],
@@ -130,37 +157,14 @@ function getRepeatStringIndex(name: RepeatStringsName, s: string): number {
 
   return index
 }
-
-// Strip off the url so only the image name is left
-// http:bungie.com/blah/blah/123.jpg -> 123.jpg
-function stripImageUrl(url: string): string {
-  const index = url.lastIndexOf("/")
-  const shortUrl = url.substring(index + 1)
-  return shortUrl
-}
-
-// TODO: Update to retry a couple of times instead of failing right away
-async function downloadJsonFile(url: string): Promise<any> {
-  try {
-    const response = await fetch(url)
-
-    if (!response.ok) {
-      throw new Error(`Failed to fetch JSON: ${response.statusText}`)
-    }
-
-    return response.json()
-  } catch (error) {
-    throw new Error(`Failed to download JSON file: ${error}`)
-  }
-}
-
-function createMiniDefinition(jsonData: JsonData): JSON {
+  
   const processedData: { [key: string]: any } = {}
 
   const sortedDataKeys = Object.keys(jsonData).sort((a, b) => parseFloat(a) - parseFloat(b));
 
   for (const key of sortedDataKeys) {
     const item: any = {}
+
     if (jsonData.hasOwnProperty(key)) {
       const redacted = jsonData[key].redacted
       if (redacted) {
