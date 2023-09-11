@@ -134,7 +134,8 @@ function downloadJsonFile(url) {
 function createMiniDefinition(jsonData) {
     var _a, _b, _c, _d;
     const processedData = {};
-    for (const key in jsonData) {
+    const sortedDataKeys = Object.keys(jsonData).sort((a, b) => parseFloat(a) - parseFloat(b));
+    for (const key of sortedDataKeys) {
         const item = {};
         if (jsonData.hasOwnProperty(key)) {
             const redacted = jsonData[key].redacted;
@@ -323,7 +324,8 @@ function createMiniDefinition(jsonData) {
                 const displayVersionWatermarkIcons = jsonData[key].displayVersionWatermarkIcons;
                 if (displayVersionWatermarkIcons) {
                     const dvwi = [];
-                    for (const watermark in displayVersionWatermarkIcons) {
+                    const sortedWatermarkKeys = Object.keys(displayVersionWatermarkIcons).sort((a, b) => parseFloat(a) - parseFloat(b));
+                    for (const watermark of sortedWatermarkKeys) {
                         if (!watermark) {
                             continue;
                         }
@@ -340,7 +342,8 @@ function createMiniDefinition(jsonData) {
                 const st = {};
                 const itemStats = stats.stats;
                 const s = {};
-                for (const key in itemStats) {
+                const sortedStatKeys = Object.keys(itemStats).sort((a, b) => parseFloat(a) - parseFloat(b));
+                for (const key of sortedStatKeys) {
                     s[getRepeatStringIndex(RepeatStringsName.StatHash, key)] = itemStats[key].value;
                 }
                 if (Object.keys(s).length > 0) {
@@ -557,8 +560,12 @@ function useContentPaths(jsonWorldComponentContentPaths) {
         yield Promise.all(promises);
     });
 }
-function getFullDefinitions(jsonWorldComponentContentPaths) {
+// Used when investigating. This downloads and saves the original bungieItemDef files which are huge.
+function getFullDefinitions() {
     return __awaiter(this, void 0, void 0, function* () {
+        const manifestUrl = "https://www.bungie.net/Platform/Destiny2/Manifest/";
+        const jsonManifest = yield downloadJsonFile(manifestUrl);
+        const jsonWorldComponentContentPaths = jsonManifest.Response.jsonWorldComponentContentPaths;
         const promises = [];
         for (const key in jsonWorldComponentContentPaths) {
             const definitionUrl = "https://bungie.com" + jsonWorldComponentContentPaths[key].DestinyInventoryItemDefinition;
@@ -597,33 +604,33 @@ function isNewManifest(jsonManifest) {
 }
 function main() {
     return __awaiter(this, void 0, void 0, function* () {
-        // try {
-        console.time("download-manifest");
-        const manifestUrl = "https://www.bungie.net/Platform/Destiny2/Manifest/";
-        const jsonManifest = yield downloadJsonFile(manifestUrl);
-        const jsonWorldComponentContentPaths = jsonManifest.Response.jsonWorldComponentContentPaths;
-        yield getFullDefinitions(jsonWorldComponentContentPaths);
-        // const isNew = await isNewManifest(jsonManifest)
-        // if (isNew) {
-        //   const jsonManifest = await downloadJsonFile(manifestUrl)
-        //   console.timeEnd("download-manifest")
-        //   const jsonWorldComponentContentPaths = jsonManifest.Response.jsonWorldComponentContentPaths
-        //   console.time("total-json-parse")
-        //   await useContentPaths(jsonWorldComponentContentPaths)
-        //   console.timeEnd("total-json-parse")
-        //   const time = new Date().toISOString()
-        //   const manifest = { version: time }
-        //   const savePath = path.join(__dirname, `../../frontend/public/json/manifest.json`)
-        //   await saveToJsonFile(manifest, savePath)
-        //   const manifestSavePath = path.join(__dirname, "../runner/bungieManifest.json")
-        //   await saveToJsonFile(jsonManifest, manifestSavePath)
-        // } else {
-        //   console.log("No new manifest detected")
-        //   process.exit(1)
-        //   }
-        // } catch (error) {
-        //   console.error(error)
-        // }
+        try {
+            console.time("download-manifest");
+            const manifestUrl = "https://www.bungie.net/Platform/Destiny2/Manifest/";
+            const jsonManifest = yield downloadJsonFile(manifestUrl);
+            const isNew = yield isNewManifest(jsonManifest);
+            if (isNew) {
+                const jsonManifest = yield downloadJsonFile(manifestUrl);
+                console.timeEnd("download-manifest");
+                const jsonWorldComponentContentPaths = jsonManifest.Response.jsonWorldComponentContentPaths;
+                console.time("total-json-parse");
+                yield useContentPaths(jsonWorldComponentContentPaths);
+                console.timeEnd("total-json-parse");
+                const time = new Date().toISOString();
+                const manifest = { version: time };
+                const savePath = path_1.default.join(__dirname, `../../frontend/public/json/manifest.json`);
+                yield saveToJsonFile(manifest, savePath);
+                const manifestSavePath = path_1.default.join(__dirname, "../runner/bungieManifest.json");
+                yield saveToJsonFile(jsonManifest, manifestSavePath);
+            }
+            else {
+                console.log("No new manifest detected");
+                process.exit(1);
+            }
+        }
+        catch (error) {
+            console.error(error);
+        }
     });
 }
 main();

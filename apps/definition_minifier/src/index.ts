@@ -157,7 +157,9 @@ async function downloadJsonFile(url: string): Promise<any> {
 function createMiniDefinition(jsonData: JsonData): JSON {
   const processedData: { [key: string]: any } = {}
 
-  for (const key in jsonData) {
+  const sortedDataKeys = Object.keys(jsonData).sort((a, b) => parseFloat(a) - parseFloat(b));
+
+  for (const key of sortedDataKeys) {
     const item: any = {}
     if (jsonData.hasOwnProperty(key)) {
       const redacted = jsonData[key].redacted
@@ -390,7 +392,8 @@ function createMiniDefinition(jsonData: JsonData): JSON {
         if (displayVersionWatermarkIcons) {
           const dvwi: any[] = []
 
-          for (const watermark in displayVersionWatermarkIcons) {
+          const sortedWatermarkKeys = Object.keys(displayVersionWatermarkIcons).sort((a, b) => parseFloat(a) - parseFloat(b));
+          for (const watermark of sortedWatermarkKeys) {
             if (!watermark) {
               continue
             }
@@ -411,7 +414,8 @@ function createMiniDefinition(jsonData: JsonData): JSON {
         const itemStats = stats.stats
 
         const s: any = {}
-        for (const key in itemStats) {
+        const sortedStatKeys = Object.keys(itemStats).sort((a, b) => parseFloat(a) - parseFloat(b));
+        for (const key of sortedStatKeys) {
           s[getRepeatStringIndex(RepeatStringsName.StatHash, key)] = itemStats[key].value
         }
 
