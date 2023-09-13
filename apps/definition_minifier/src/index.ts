@@ -713,7 +713,9 @@ async function downloadAndMinifyDefinition(definitionUrl: string, key: string): 
 
   const outputFilePath = path.join(__dirname, `../../frontend/public/json/${key}.json`)
 
+  console.time(`${key} save-took:`)
   await saveToJsonFile(processedData, outputFilePath)
+  console.timeEnd(`${key} save-took:`)
 
   console.log("")
 }

@@ -585,7 +585,9 @@ function downloadAndMinifyDefinition(definitionUrl, key) {
         const processedData = createMiniDefinition(jsonData);
         console.timeEnd(`${key} parse-took:`);
         const outputFilePath = path_1.default.join(__dirname, `../../frontend/public/json/${key}.json`);
+        console.time(`${key} save-took:`);
         yield saveToJsonFile(processedData, outputFilePath);
+        console.timeEnd(`${key} save-took:`);
         console.log("");
     });
 }
