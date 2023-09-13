@@ -33,6 +33,39 @@ enum RepeatStringsName {
   TalentGridHash,
 }
 
+// These are the definition Ishtar downloads and uses as they are.
+// Copied here so they can be downloaded to see if any are getting too large
+enum NeededDefinitions {
+  DestinyVendorDefinition,
+  DestinyVendorGroupDefinition,
+  DestinyItemCategoryDefinition,
+  DestinyClassDefinition,
+  DestinyRaceDefinition,
+  DestinyItemTierTypeDefinition,
+  DestinyObjectiveDefinition,
+  DestinySandboxPerkDefinition,
+  DestinySocketCategoryDefinition,
+  DestinySocketTypeDefinition,
+  DestinyProgressionDefinition,
+  DestinyActivityModifierDefinition,
+  DestinyArtifactDefinition,
+  DestinyFactionDefinition,
+  DestinyInventoryBucketDefinition,
+  DestinyMaterialRequirementSetDefinition,
+  DestinyMilestoneDefinition,
+  DestinyStatDefinition,
+  DestinyInventoryItemLiteDefinition,
+  DestinyPowerCapDefinition,
+  DestinySeasonDefinition,
+  DestinySeasonPassDefinition,
+  DestinyCollectibleDefinition,
+  DestinyPresentationNodeDefinition,
+  DestinyPlugSetDefinition,
+  DestinyRecordDefinition,
+  DestinyLoreDefinition,
+  DestinyDamageTypeDefinition,
+}
+
 // Interface (Schema) for the DestinyItemDefinition
 interface JsonData {
   [key: string]: {
@@ -157,7 +190,7 @@ function createMiniDefinition(jsonData: JsonData): JSON {
 
   const processedData: { [key: string]: any } = {}
 
-  const sortedDataKeys = Object.keys(jsonData).sort((a, b) => parseFloat(a) - parseFloat(b));
+  const sortedDataKeys = Object.keys(jsonData).sort((a, b) => parseFloat(a) - parseFloat(b))
 
   for (const key of sortedDataKeys) {
     const item: any = {}
@@ -393,7 +426,9 @@ function createMiniDefinition(jsonData: JsonData): JSON {
         if (displayVersionWatermarkIcons) {
           const dvwi: any[] = []
 
-          const sortedWatermarkKeys = Object.keys(displayVersionWatermarkIcons).sort((a, b) => parseFloat(a) - parseFloat(b));
+          const sortedWatermarkKeys = Object.keys(displayVersionWatermarkIcons).sort(
+            (a, b) => parseFloat(a) - parseFloat(b)
+          )
           for (const watermark of sortedWatermarkKeys) {
             if (!watermark) {
               continue
@@ -415,7 +450,7 @@ function createMiniDefinition(jsonData: JsonData): JSON {
         const itemStats = stats.stats
 
         const s: any = {}
-        const sortedStatKeys = Object.keys(itemStats).sort((a, b) => parseFloat(a) - parseFloat(b));
+        const sortedStatKeys = Object.keys(itemStats).sort((a, b) => parseFloat(a) - parseFloat(b))
         for (const key of sortedStatKeys) {
           s[getRepeatStringIndex(RepeatStringsName.StatHash, key)] = itemStats[key].value
         }
@@ -700,6 +735,29 @@ async function getFullDefinitions(): Promise<void> {
 
   // Wait for all promises to resolve in parallel
   await Promise.all(promises)
+}
+
+async function getAllBungieDefinitions(): Promise<void> {
+  const manifestUrl = "https://www.bungie.net/Platform/Destiny2/Manifest/"
+  const jsonManifest = await downloadJsonFile(manifestUrl)
+
+  
+
+  const promises: Promise<void>[] = []
+
+  const enumNames = Object.keys(NeededDefinitions).filter((key) =>
+    isNaN(Number(key))
+  ) as (keyof typeof NeededDefinitions)[]
+
+  // Iterate over the enum names
+  for (const enumName of enumNames) {
+    const defUrl = jsonManifest.Response.jsonWorldComponentContentPaths.en[`${enumName}`]
+    const definitionUrl = "https://bungie.com" + defUrl
+
+    const jsonData = await downloadJsonFile(definitionUrl)
+    await saveToJsonFile(jsonData, `${enumName}.json`)
+  }
+
 }
 
 async function downloadAndMinifyDefinition(definitionUrl: string, key: string): Promise<void> {

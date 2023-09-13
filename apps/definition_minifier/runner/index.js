@@ -69,6 +69,39 @@ var RepeatStringsName;
     RepeatStringsName[RepeatStringsName["SocketTypeHash"] = 26] = "SocketTypeHash";
     RepeatStringsName[RepeatStringsName["TalentGridHash"] = 27] = "TalentGridHash";
 })(RepeatStringsName || (RepeatStringsName = {}));
+// These are the definition Ishtar downloads and uses as they are.
+// Copied here so they can be downloaded to see if any are getting too large
+var NeededDefinitions;
+(function (NeededDefinitions) {
+    NeededDefinitions[NeededDefinitions["DestinyVendorDefinition"] = 0] = "DestinyVendorDefinition";
+    NeededDefinitions[NeededDefinitions["DestinyVendorGroupDefinition"] = 1] = "DestinyVendorGroupDefinition";
+    NeededDefinitions[NeededDefinitions["DestinyItemCategoryDefinition"] = 2] = "DestinyItemCategoryDefinition";
+    NeededDefinitions[NeededDefinitions["DestinyClassDefinition"] = 3] = "DestinyClassDefinition";
+    NeededDefinitions[NeededDefinitions["DestinyRaceDefinition"] = 4] = "DestinyRaceDefinition";
+    NeededDefinitions[NeededDefinitions["DestinyItemTierTypeDefinition"] = 5] = "DestinyItemTierTypeDefinition";
+    NeededDefinitions[NeededDefinitions["DestinyObjectiveDefinition"] = 6] = "DestinyObjectiveDefinition";
+    NeededDefinitions[NeededDefinitions["DestinySandboxPerkDefinition"] = 7] = "DestinySandboxPerkDefinition";
+    NeededDefinitions[NeededDefinitions["DestinySocketCategoryDefinition"] = 8] = "DestinySocketCategoryDefinition";
+    NeededDefinitions[NeededDefinitions["DestinySocketTypeDefinition"] = 9] = "DestinySocketTypeDefinition";
+    NeededDefinitions[NeededDefinitions["DestinyProgressionDefinition"] = 10] = "DestinyProgressionDefinition";
+    NeededDefinitions[NeededDefinitions["DestinyActivityModifierDefinition"] = 11] = "DestinyActivityModifierDefinition";
+    NeededDefinitions[NeededDefinitions["DestinyArtifactDefinition"] = 12] = "DestinyArtifactDefinition";
+    NeededDefinitions[NeededDefinitions["DestinyFactionDefinition"] = 13] = "DestinyFactionDefinition";
+    NeededDefinitions[NeededDefinitions["DestinyInventoryBucketDefinition"] = 14] = "DestinyInventoryBucketDefinition";
+    NeededDefinitions[NeededDefinitions["DestinyMaterialRequirementSetDefinition"] = 15] = "DestinyMaterialRequirementSetDefinition";
+    NeededDefinitions[NeededDefinitions["DestinyMilestoneDefinition"] = 16] = "DestinyMilestoneDefinition";
+    NeededDefinitions[NeededDefinitions["DestinyStatDefinition"] = 17] = "DestinyStatDefinition";
+    NeededDefinitions[NeededDefinitions["DestinyInventoryItemLiteDefinition"] = 18] = "DestinyInventoryItemLiteDefinition";
+    NeededDefinitions[NeededDefinitions["DestinyPowerCapDefinition"] = 19] = "DestinyPowerCapDefinition";
+    NeededDefinitions[NeededDefinitions["DestinySeasonDefinition"] = 20] = "DestinySeasonDefinition";
+    NeededDefinitions[NeededDefinitions["DestinySeasonPassDefinition"] = 21] = "DestinySeasonPassDefinition";
+    NeededDefinitions[NeededDefinitions["DestinyCollectibleDefinition"] = 22] = "DestinyCollectibleDefinition";
+    NeededDefinitions[NeededDefinitions["DestinyPresentationNodeDefinition"] = 23] = "DestinyPresentationNodeDefinition";
+    NeededDefinitions[NeededDefinitions["DestinyPlugSetDefinition"] = 24] = "DestinyPlugSetDefinition";
+    NeededDefinitions[NeededDefinitions["DestinyRecordDefinition"] = 25] = "DestinyRecordDefinition";
+    NeededDefinitions[NeededDefinitions["DestinyLoreDefinition"] = 26] = "DestinyLoreDefinition";
+    NeededDefinitions[NeededDefinitions["DestinyDamageTypeDefinition"] = 27] = "DestinyDamageTypeDefinition";
+})(NeededDefinitions || (NeededDefinitions = {}));
 // Strip off the url so only the image name is left
 // http:bungie.com/blah/blah/123.jpg -> 123.jpg
 function stripImageUrl(url) {
@@ -574,6 +607,21 @@ function getFullDefinitions() {
         }
         // Wait for all promises to resolve in parallel
         yield Promise.all(promises);
+    });
+}
+function getAllBungieDefinitions() {
+    return __awaiter(this, void 0, void 0, function* () {
+        const manifestUrl = "https://www.bungie.net/Platform/Destiny2/Manifest/";
+        const jsonManifest = yield downloadJsonFile(manifestUrl);
+        const promises = [];
+        const enumNames = Object.keys(NeededDefinitions).filter((key) => isNaN(Number(key)));
+        // Iterate over the enum names
+        for (const enumName of enumNames) {
+            const defUrl = jsonManifest.Response.jsonWorldComponentContentPaths.en[`${enumName}`];
+            const definitionUrl = "https://bungie.com" + defUrl;
+            const jsonData = yield downloadJsonFile(definitionUrl);
+            yield saveToJsonFile(jsonData, `${enumName}.json`);
+        }
     });
 }
 function downloadAndMinifyDefinition(definitionUrl, key) {
