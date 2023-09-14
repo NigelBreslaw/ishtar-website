@@ -39,3 +39,9 @@ jobs:
           git add .
           git commit -m "Commit new definitions"
           git push
+
+      - name: Send Slack Notification
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          curl -X POST -H 'Content-type: application/json' --data '{"text":"New Destiny Item Definitions were just created"}' $SLACK_WEBHOOK_URL
