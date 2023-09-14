@@ -31,6 +31,7 @@ enum RepeatStringsName {
   SocketEntries,
   SocketTypeHash,
   TalentGridHash,
+  Icon,
 }
 
 // These are the definition Ishtar downloads and uses as they are.
@@ -92,6 +93,7 @@ interface JsonData {
       itemValue?: [itemHash?: string, quantity?: any]
     }
     displayProperties?: {
+      iconSequences: any
       name?: any
       description?: any
       icon?: any
@@ -175,6 +177,7 @@ function createMiniDefinition(jsonData: JsonData): JSON {
     [RepeatStringsName.SocketEntries]: [],
     [RepeatStringsName.SocketTypeHash]: [],
     [RepeatStringsName.TalentGridHash]: [],
+    [RepeatStringsName.Icon]: [],
   }
 
   // Send a repeat string and get a index value back
@@ -218,6 +221,25 @@ function createMiniDefinition(jsonData: JsonData): JSON {
         const icon = displayProperties.icon
         if (icon) {
           item.i = stripImageUrl(icon)
+        }
+
+        const iconSequences = displayProperties.iconSequences
+        if (iconSequences) {
+          const f: any[] = []
+
+          for (const section of iconSequences) {
+            const framesArray: any[] = []
+
+            for (const frame of section.frames) {
+              framesArray.push(getRepeatStringIndex(RepeatStringsName.Icon, frame.toString()))
+            }
+            if (framesArray.length > 0) {
+              f.push(framesArray)
+            }
+          }
+          if (f.length > 0) {
+            item.f = f
+          }
         }
       }
 
@@ -741,8 +763,6 @@ async function getAllBungieDefinitions(): Promise<void> {
   const manifestUrl = "https://www.bungie.net/Platform/Destiny2/Manifest/"
   const jsonManifest = await downloadJsonFile(manifestUrl)
 
-  
-
   const promises: Promise<void>[] = []
 
   const enumNames = Object.keys(NeededDefinitions).filter((key) =>
@@ -757,7 +777,6 @@ async function getAllBungieDefinitions(): Promise<void> {
     const jsonData = await downloadJsonFile(definitionUrl)
     await saveToJsonFile(jsonData, `${enumName}.json`)
   }
-
 }
 
 async function downloadAndMinifyDefinition(definitionUrl: string, key: string): Promise<void> {

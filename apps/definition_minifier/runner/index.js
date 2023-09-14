@@ -68,6 +68,7 @@ var RepeatStringsName;
     RepeatStringsName[RepeatStringsName["SocketEntries"] = 25] = "SocketEntries";
     RepeatStringsName[RepeatStringsName["SocketTypeHash"] = 26] = "SocketTypeHash";
     RepeatStringsName[RepeatStringsName["TalentGridHash"] = 27] = "TalentGridHash";
+    RepeatStringsName[RepeatStringsName["Icon"] = 28] = "Icon";
 })(RepeatStringsName || (RepeatStringsName = {}));
 // These are the definition Ishtar downloads and uses as they are.
 // Copied here so they can be downloaded to see if any are getting too large
@@ -156,6 +157,7 @@ function createMiniDefinition(jsonData) {
         [RepeatStringsName.SocketEntries]: [],
         [RepeatStringsName.SocketTypeHash]: [],
         [RepeatStringsName.TalentGridHash]: [],
+        [RepeatStringsName.Icon]: [],
     };
     // Send a repeat string and get a index value back
     function getRepeatStringIndex(name, s) {
@@ -191,6 +193,22 @@ function createMiniDefinition(jsonData) {
                 const icon = displayProperties.icon;
                 if (icon) {
                     item.i = stripImageUrl(icon);
+                }
+                const iconSequences = displayProperties.iconSequences;
+                if (iconSequences) {
+                    const f = [];
+                    for (const section of iconSequences) {
+                        const framesArray = [];
+                        for (const frame of section.frames) {
+                            framesArray.push(getRepeatStringIndex(RepeatStringsName.Icon, frame.toString()));
+                        }
+                        if (framesArray.length > 0) {
+                            f.push(framesArray);
+                        }
+                    }
+                    if (f.length > 0) {
+                        item.f = f;
+                    }
                 }
             }
             const secondaryIcon = jsonData[key].secondaryIcon;
