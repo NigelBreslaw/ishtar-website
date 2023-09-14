@@ -220,7 +220,7 @@ function createMiniDefinition(jsonData: JsonData): JSON {
 
         const icon = displayProperties.icon
         if (icon) {
-          item.i = stripImageUrl(icon)
+          item.i = getRepeatStringIndex(RepeatStringsName.Icon, stripImageUrl(icon))
         }
 
         const iconSequences = displayProperties.iconSequences
