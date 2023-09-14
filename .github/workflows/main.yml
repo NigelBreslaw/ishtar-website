@@ -44,4 +44,4 @@ jobs:
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         run: |
-          curl -X POST -H 'Content-type: application/json' --data '{"text":"New Destiny Item Definitions were just created"}' $SLACK_WEBHOOK_URL
+          curl -X POST -H 'Content-type: application/json' --data '{"text":"@nigel New Destiny Item Definitions were just created"}' $SLACK_WEBHOOK_URL
