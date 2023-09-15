@@ -127,46 +127,137 @@ function downloadJsonFile(url) {
 }
 function createMiniDefinition(jsonData) {
     var _a, _b, _c, _d;
-    // Dictionary of the repeat string arrays
-    const repeatStrings = {
-        [RepeatStringsName.Descriptions]: [],
-        [RepeatStringsName.DisplaySources]: [],
-        [RepeatStringsName.ExpirationTooltip]: [],
-        [RepeatStringsName.ItemTypeDisplayName]: [],
-        [RepeatStringsName.ExpiredInActivityMessage]: [],
-        [RepeatStringsName.IconWaterMark]: [],
-        [RepeatStringsName.TraitIds]: [],
-        [RepeatStringsName.UiItemDisplayStyle]: [],
-        [RepeatStringsName.PlugCategoryIdentifier]: [],
-        [RepeatStringsName.UiPlugLabel]: [],
-        [RepeatStringsName.InsertionMaterialRequirementHash]: [],
-        [RepeatStringsName.StackUniqueLabel]: [],
-        [RepeatStringsName.BucketTypeHash]: [],
-        [RepeatStringsName.Versions]: [],
-        [RepeatStringsName.StatHash]: [],
-        [RepeatStringsName.StatGroupHash]: [],
-        [RepeatStringsName.DamageTypeHashes]: [],
-        [RepeatStringsName.ItemValue]: [],
-        [RepeatStringsName.TooltipNotifications]: [],
-        [RepeatStringsName.ReusablePlugSetHash]: [],
-        [RepeatStringsName.SingleInitialItemHash]: [],
-        [RepeatStringsName.SocketCategoryHash]: [],
-        [RepeatStringsName.SocketIndexes]: [],
-        [RepeatStringsName.SocketCategories]: [],
-        [RepeatStringsName.PlugCategoryHash]: [],
-        [RepeatStringsName.SocketEntries]: [],
-        [RepeatStringsName.SocketTypeHash]: [],
-        [RepeatStringsName.TalentGridHash]: [],
-        [RepeatStringsName.Icon]: [],
-    };
-    // Send a repeat string and get a index value back
-    function getRepeatStringIndex(name, s) {
-        const index = repeatStrings[name].indexOf(s);
-        if (index === -1) {
-            repeatStrings[name].push(s);
-            return getRepeatStringIndex(name, s);
+    const repeatMaps = {
+        [RepeatStringsName.Descriptions]: {
+            stringArray: [],
+            stringMap: new Map()
+        },
+        [RepeatStringsName.DisplaySources]: {
+            stringArray: [],
+            stringMap: new Map()
+        },
+        [RepeatStringsName.ExpirationTooltip]: {
+            stringArray: [],
+            stringMap: new Map()
+        },
+        [RepeatStringsName.ItemTypeDisplayName]: {
+            stringArray: [],
+            stringMap: new Map()
+        },
+        [RepeatStringsName.ExpiredInActivityMessage]: {
+            stringArray: [],
+            stringMap: new Map()
+        },
+        [RepeatStringsName.IconWaterMark]: {
+            stringArray: [],
+            stringMap: new Map()
+        },
+        [RepeatStringsName.TraitIds]: {
+            stringArray: [],
+            stringMap: new Map()
+        },
+        [RepeatStringsName.UiItemDisplayStyle]: {
+            stringArray: [],
+            stringMap: new Map()
+        },
+        [RepeatStringsName.PlugCategoryIdentifier]: {
+            stringArray: [],
+            stringMap: new Map()
+        },
+        [RepeatStringsName.UiPlugLabel]: {
+            stringArray: [],
+            stringMap: new Map()
+        },
+        [RepeatStringsName.InsertionMaterialRequirementHash]: {
+            stringArray: [],
+            stringMap: new Map()
+        },
+        [RepeatStringsName.StackUniqueLabel]: {
+            stringArray: [],
+            stringMap: new Map()
+        },
+        [RepeatStringsName.BucketTypeHash]: {
+            stringArray: [],
+            stringMap: new Map()
+        },
+        [RepeatStringsName.Versions]: {
+            stringArray: [],
+            stringMap: new Map()
+        },
+        [RepeatStringsName.StatHash]: {
+            stringArray: [],
+            stringMap: new Map()
+        },
+        [RepeatStringsName.StatGroupHash]: {
+            stringArray: [],
+            stringMap: new Map()
+        },
+        [RepeatStringsName.DamageTypeHashes]: {
+            stringArray: [],
+            stringMap: new Map()
+        },
+        [RepeatStringsName.ItemValue]: {
+            stringArray: [],
+            stringMap: new Map()
+        },
+        [RepeatStringsName.TooltipNotifications]: {
+            stringArray: [],
+            stringMap: new Map()
+        },
+        [RepeatStringsName.ReusablePlugSetHash]: {
+            stringArray: [],
+            stringMap: new Map()
+        },
+        [RepeatStringsName.SingleInitialItemHash]: {
+            stringArray: [],
+            stringMap: new Map()
+        },
+        [RepeatStringsName.SocketCategoryHash]: {
+            stringArray: [],
+            stringMap: new Map()
+        },
+        [RepeatStringsName.SocketIndexes]: {
+            stringArray: [],
+            stringMap: new Map()
+        },
+        [RepeatStringsName.SocketCategories]: {
+            stringArray: [],
+            stringMap: new Map()
+        },
+        [RepeatStringsName.PlugCategoryHash]: {
+            stringArray: [],
+            stringMap: new Map()
+        },
+        [RepeatStringsName.SocketEntries]: {
+            stringArray: [],
+            stringMap: new Map()
+        },
+        [RepeatStringsName.SocketTypeHash]: {
+            stringArray: [],
+            stringMap: new Map()
+        },
+        [RepeatStringsName.TalentGridHash]: {
+            stringArray: [],
+            stringMap: new Map()
+        },
+        [RepeatStringsName.Icon]: {
+            stringArray: [],
+            stringMap: new Map()
         }
-        return index;
+    };
+    function getRepeatStringIndex(name, s) {
+        const index = repeatMaps[name].stringMap.get(s);
+        if (index !== undefined) {
+            // The index is found
+            return index;
+        }
+        else {
+            // The string is not in the array
+            var arrayLength = repeatMaps[name].stringArray.length;
+            repeatMaps[name].stringMap.set(s, arrayLength);
+            repeatMaps[name].stringArray.push(s);
+            return arrayLength;
+        }
     }
     const processedData = {};
     const sortedDataKeys = Object.keys(jsonData).sort((a, b) => parseFloat(a) - parseFloat(b));
@@ -192,7 +283,8 @@ function createMiniDefinition(jsonData) {
                 }
                 const icon = displayProperties.icon;
                 if (icon) {
-                    item.i = getRepeatStringIndex(RepeatStringsName.Icon, stripImageUrl(icon));
+                    const shortIcon = stripImageUrl(icon);
+                    item.i = getRepeatStringIndex(RepeatStringsName.Icon, shortIcon);
                 }
                 const iconSequences = displayProperties.iconSequences;
                 if (iconSequences) {
@@ -566,7 +658,7 @@ function createMiniDefinition(jsonData) {
     const enumNames = Object.keys(RepeatStringsName).filter((key) => isNaN(Number(key)));
     // Iterate over the enum names
     for (const enumName of enumNames) {
-        const stringArray = repeatStrings[RepeatStringsName[enumName]];
+        const stringArray = repeatMaps[RepeatStringsName[enumName]].stringArray;
         processedData[enumName] = stringArray;
     }
     return processedData;

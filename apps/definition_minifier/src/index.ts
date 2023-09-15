@@ -147,49 +147,151 @@ async function downloadJsonFile(url: string): Promise<any> {
 }
 
 function createMiniDefinition(jsonData: JsonData): JSON {
-  // Dictionary of the repeat string arrays
-  const repeatStrings: Record<RepeatStringsName, string[]> = {
-    [RepeatStringsName.Descriptions]: [],
-    [RepeatStringsName.DisplaySources]: [],
-    [RepeatStringsName.ExpirationTooltip]: [],
-    [RepeatStringsName.ItemTypeDisplayName]: [],
-    [RepeatStringsName.ExpiredInActivityMessage]: [],
-    [RepeatStringsName.IconWaterMark]: [],
-    [RepeatStringsName.TraitIds]: [],
-    [RepeatStringsName.UiItemDisplayStyle]: [],
-    [RepeatStringsName.PlugCategoryIdentifier]: [],
-    [RepeatStringsName.UiPlugLabel]: [],
-    [RepeatStringsName.InsertionMaterialRequirementHash]: [],
-    [RepeatStringsName.StackUniqueLabel]: [],
-    [RepeatStringsName.BucketTypeHash]: [],
-    [RepeatStringsName.Versions]: [],
-    [RepeatStringsName.StatHash]: [],
-    [RepeatStringsName.StatGroupHash]: [],
-    [RepeatStringsName.DamageTypeHashes]: [],
-    [RepeatStringsName.ItemValue]: [],
-    [RepeatStringsName.TooltipNotifications]: [],
-    [RepeatStringsName.ReusablePlugSetHash]: [],
-    [RepeatStringsName.SingleInitialItemHash]: [],
-    [RepeatStringsName.SocketCategoryHash]: [],
-    [RepeatStringsName.SocketIndexes]: [],
-    [RepeatStringsName.SocketCategories]: [],
-    [RepeatStringsName.PlugCategoryHash]: [],
-    [RepeatStringsName.SocketEntries]: [],
-    [RepeatStringsName.SocketTypeHash]: [],
-    [RepeatStringsName.TalentGridHash]: [],
-    [RepeatStringsName.Icon]: [],
+
+
+  type Repeater = {
+    stringArray: string[]
+    stringMap: Map<string, number>
   }
 
-  // Send a repeat string and get a index value back
-  function getRepeatStringIndex(name: RepeatStringsName, s: string): number {
-    const index = repeatStrings[name].indexOf(s)
-    if (index === -1) {
-      repeatStrings[name].push(s)
-      return getRepeatStringIndex(name, s)
+  const repeatMaps: Record<RepeatStringsName, Repeater> = {
+    [RepeatStringsName.Descriptions]: {
+      stringArray: [],
+      stringMap: new Map<string, number>()
+    },
+    [RepeatStringsName.DisplaySources]: {
+      stringArray: [],
+      stringMap: new Map<string, number>()
+    },
+    [RepeatStringsName.ExpirationTooltip]: {
+      stringArray: [],
+      stringMap: new Map<string, number>()
+    },
+    [RepeatStringsName.ItemTypeDisplayName]: {
+      stringArray: [],
+      stringMap: new Map<string, number>()
+    },
+    [RepeatStringsName.ExpiredInActivityMessage]: {
+      stringArray: [],
+      stringMap: new Map<string, number>()
+    },
+    [RepeatStringsName.IconWaterMark]: {
+      stringArray: [],
+      stringMap: new Map<string, number>()
+    },
+    [RepeatStringsName.TraitIds]: {
+      stringArray: [],
+      stringMap: new Map<string, number>()
+    },
+    [RepeatStringsName.UiItemDisplayStyle]: {
+      stringArray: [],
+      stringMap: new Map<string, number>()
+    },
+    [RepeatStringsName.PlugCategoryIdentifier]: {
+      stringArray: [],
+      stringMap: new Map<string, number>()
+    },
+    [RepeatStringsName.UiPlugLabel]: {
+      stringArray: [],
+      stringMap: new Map<string, number>()
+    },
+    [RepeatStringsName.InsertionMaterialRequirementHash]: {
+      stringArray: [],
+      stringMap: new Map<string, number>()
+    },
+    [RepeatStringsName.StackUniqueLabel]: {
+      stringArray: [],
+      stringMap: new Map<string, number>()
+    },
+    [RepeatStringsName.BucketTypeHash]: {
+      stringArray: [],
+      stringMap: new Map<string, number>()
+    },
+    [RepeatStringsName.Versions]: {
+      stringArray: [],
+      stringMap: new Map<string, number>()
+    },
+    [RepeatStringsName.StatHash]: {
+      stringArray: [],
+      stringMap: new Map<string, number>()
+    },
+    [RepeatStringsName.StatGroupHash]: {
+      stringArray: [],
+      stringMap: new Map<string, number>()
+    },
+    [RepeatStringsName.DamageTypeHashes]: {
+      stringArray: [],
+      stringMap: new Map<string, number>()
+    },
+    [RepeatStringsName.ItemValue]: {
+      stringArray: [],
+      stringMap: new Map<string, number>()
+    },
+    [RepeatStringsName.TooltipNotifications]: {
+      stringArray: [],
+      stringMap: new Map<string, number>()
+    },
+    [RepeatStringsName.ReusablePlugSetHash]: {
+      stringArray: [],
+      stringMap: new Map<string, number>()
+    },
+    [RepeatStringsName.SingleInitialItemHash]: {
+      stringArray: [],
+      stringMap: new Map<string, number>()
+    },
+    [RepeatStringsName.SocketCategoryHash]: {
+      stringArray: [],
+      stringMap: new Map<string, number>()
+    },
+    [RepeatStringsName.SocketIndexes]: {
+      stringArray: [],
+      stringMap: new Map<string, number>()
+    },
+    [RepeatStringsName.SocketCategories]: {
+      stringArray: [],
+      stringMap: new Map<string, number>()
+    },
+    [RepeatStringsName.PlugCategoryHash]: {
+      stringArray: [],
+      stringMap: new Map<string, number>()
+    },
+    [RepeatStringsName.SocketEntries]: {
+      stringArray: [],
+      stringMap: new Map<string, number>()
+    },
+    [RepeatStringsName.SocketTypeHash]: {
+      stringArray: [],
+      stringMap: new Map<string, number>()
+    },
+    [RepeatStringsName.TalentGridHash]: {
+      stringArray: [],
+      stringMap: new Map<string, number>()
+    },
+    [RepeatStringsName.Icon]: {
+      stringArray: [],
+      stringMap: new Map<string, number>()
     }
-
-    return index
   }
+
+
+  function getRepeatStringIndex(name: RepeatStringsName, s: string): number {
+    const index = repeatMaps[name].stringMap.get(s);
+    if (index !== undefined) {
+      // The index is found
+      return index
+    } else {
+      // The string is not in the array
+      var arrayLength = repeatMaps[name].stringArray.length
+      repeatMaps[name].stringMap.set(s, arrayLength)
+      repeatMaps[name].stringArray.push(s)
+      return arrayLength
+}
+  }
+
+
+  
+
+ 
 
   const processedData: { [key: string]: any } = {}
 
@@ -220,7 +322,8 @@ function createMiniDefinition(jsonData: JsonData): JSON {
 
         const icon = displayProperties.icon
         if (icon) {
-          item.i = getRepeatStringIndex(RepeatStringsName.Icon, stripImageUrl(icon))
+          const shortIcon = stripImageUrl(icon)
+          item.i = getRepeatStringIndex(RepeatStringsName.Icon, shortIcon)
         }
 
         const iconSequences = displayProperties.iconSequences
@@ -691,7 +794,7 @@ function createMiniDefinition(jsonData: JsonData): JSON {
 
   // Iterate over the enum names
   for (const enumName of enumNames) {
-    const stringArray = repeatStrings[RepeatStringsName[enumName]]
+    const stringArray = repeatMaps[RepeatStringsName[enumName]].stringArray
     processedData[enumName] = stringArray
   }
 
