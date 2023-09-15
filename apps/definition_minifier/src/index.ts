@@ -322,8 +322,7 @@ function createMiniDefinition(jsonData: JsonData): JSON {
 
         const icon = displayProperties.icon
         if (icon) {
-          const shortIcon = stripImageUrl(icon)
-          item.i = getRepeatStringIndex(RepeatStringsName.Icon, shortIcon)
+          item.i = getRepeatStringIndex(RepeatStringsName.Icon, stripImageUrl(icon))
         }
 
         const iconSequences = displayProperties.iconSequences
@@ -334,7 +333,7 @@ function createMiniDefinition(jsonData: JsonData): JSON {
             const framesArray: any[] = []
 
             for (const frame of section.frames) {
-              framesArray.push(getRepeatStringIndex(RepeatStringsName.Icon, frame.toString()))
+              framesArray.push(getRepeatStringIndex(RepeatStringsName.Icon, stripImageUrl(frame)))
             }
             if (framesArray.length > 0) {
               f.push(framesArray)
