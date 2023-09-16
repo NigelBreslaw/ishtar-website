@@ -253,7 +253,7 @@ function createMiniDefinition(jsonData) {
         }
         else {
             // The string is not in the array
-            var arrayLength = repeatMaps[name].stringArray.length;
+            const arrayLength = repeatMaps[name].stringArray.length;
             repeatMaps[name].stringMap.set(s, arrayLength);
             repeatMaps[name].stringArray.push(s);
             return arrayLength;
@@ -479,7 +479,7 @@ function createMiniDefinition(jsonData) {
                 }
             }
             /// Stats
-            var stats = jsonData[key].stats;
+            const stats = jsonData[key].stats;
             if (stats) {
                 const st = {};
                 const itemStats = stats.stats;
@@ -491,7 +491,7 @@ function createMiniDefinition(jsonData) {
                 if (Object.keys(s).length > 0) {
                     st.s = s;
                 }
-                var statGroupHash = stats.statGroupHash;
+                const statGroupHash = stats.statGroupHash;
                 if (statGroupHash) {
                     st.sgs = getRepeatStringIndex(RepeatStringsName.StatGroupHash, statGroupHash);
                 }
@@ -499,7 +499,7 @@ function createMiniDefinition(jsonData) {
                     item.st = st;
                 }
             }
-            var previewVendorHash = (_d = jsonData[key].preview) === null || _d === void 0 ? void 0 : _d.previewVendorHash;
+            const previewVendorHash = (_d = jsonData[key].preview) === null || _d === void 0 ? void 0 : _d.previewVendorHash;
             if (previewVendorHash) {
                 const p = previewVendorHash;
                 if (p) {
@@ -544,7 +544,7 @@ function createMiniDefinition(jsonData) {
                     if (perkHash) {
                         jPerk.ph = perkHash;
                     }
-                    var perkVisibility = perk.perkVisibility;
+                    const perkVisibility = perk.perkVisibility;
                     if (perkVisibility) {
                         jPerk.pv = perkVisibility;
                     }
@@ -556,7 +556,7 @@ function createMiniDefinition(jsonData) {
                     item.ph = ph;
                 }
             }
-            var plug = jsonData[key].plug;
+            const plug = jsonData[key].plug;
             if (plug) {
                 const p = {};
                 const plugCategoryHash = plug === null || plug === void 0 ? void 0 : plug.plugCategoryHash;
@@ -571,7 +571,7 @@ function createMiniDefinition(jsonData) {
                     /// Intentionally call the function but don't save the result here. The p.p index will be the same.
                     getRepeatStringIndex(RepeatStringsName.PlugCategoryIdentifier, plugCategoryIdentifier);
                 }
-                var uiPlugLabel = plug.uiPlugLabel;
+                const uiPlugLabel = plug.uiPlugLabel;
                 if (uiPlugLabel) {
                     p.pl = getRepeatStringIndex(RepeatStringsName.UiPlugLabel, uiPlugLabel);
                 }
@@ -583,7 +583,7 @@ function createMiniDefinition(jsonData) {
                     item.p = p;
                 }
             }
-            var traitIds = jsonData[key].traitIds;
+            const traitIds = jsonData[key].traitIds;
             if (traitIds) {
                 const ti = [];
                 for (const traitId of traitIds) {
@@ -627,12 +627,12 @@ function createMiniDefinition(jsonData) {
                 const scJson = [];
                 for (const socketCategory of sockets.socketCategories) {
                     const socCatEntry = {};
-                    var h = socketCategory === null || socketCategory === void 0 ? void 0 : socketCategory.socketCategoryHash;
+                    const h = socketCategory === null || socketCategory === void 0 ? void 0 : socketCategory.socketCategoryHash;
                     if (h) {
                         socCatEntry.h = getRepeatStringIndex(RepeatStringsName.SocketCategoryHash, h);
                     }
                     /// NOTE: In ishtar you want to Json.parse the string you get to turn it into a json array.
-                    var socketIndexes = socketCategory === null || socketCategory === void 0 ? void 0 : socketCategory.socketIndexes;
+                    const socketIndexes = socketCategory === null || socketCategory === void 0 ? void 0 : socketCategory.socketIndexes;
                     if (socketIndexes) {
                         socCatEntry.i = getRepeatStringIndex(RepeatStringsName.SocketIndexes, JSON.stringify(socketIndexes));
                         scJson.push(socCatEntry);

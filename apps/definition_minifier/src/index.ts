@@ -281,17 +281,13 @@ function createMiniDefinition(jsonData: JsonData): JSON {
       return index
     } else {
       // The string is not in the array
-      var arrayLength = repeatMaps[name].stringArray.length
+      const arrayLength = repeatMaps[name].stringArray.length
       repeatMaps[name].stringMap.set(s, arrayLength)
       repeatMaps[name].stringArray.push(s)
       return arrayLength
 }
   }
 
-
-  
-
- 
 
   const processedData: { [key: string]: any } = {}
 
@@ -567,7 +563,7 @@ function createMiniDefinition(jsonData: JsonData): JSON {
       }
 
       /// Stats
-      var stats = jsonData[key].stats
+      const stats = jsonData[key].stats
       if (stats) {
         const st: any = {}
 
@@ -583,7 +579,7 @@ function createMiniDefinition(jsonData: JsonData): JSON {
           st.s = s
         }
 
-        var statGroupHash = stats.statGroupHash
+        const statGroupHash = stats.statGroupHash
         if (statGroupHash) {
           st.sgs = getRepeatStringIndex(RepeatStringsName.StatGroupHash, statGroupHash)
         }
@@ -593,7 +589,7 @@ function createMiniDefinition(jsonData: JsonData): JSON {
         }
       }
 
-      var previewVendorHash = jsonData[key].preview?.previewVendorHash
+      const previewVendorHash = jsonData[key].preview?.previewVendorHash
 
       if (previewVendorHash) {
         const p = previewVendorHash
@@ -649,7 +645,7 @@ function createMiniDefinition(jsonData: JsonData): JSON {
           if (perkHash) {
             jPerk.ph = perkHash
           }
-          var perkVisibility = perk.perkVisibility
+          const perkVisibility = perk.perkVisibility
           if (perkVisibility) {
             jPerk.pv = perkVisibility
           }
@@ -664,7 +660,7 @@ function createMiniDefinition(jsonData: JsonData): JSON {
         }
       }
 
-      var plug = jsonData[key].plug
+      const plug = jsonData[key].plug
       if (plug) {
         const p: any = {}
 
@@ -682,7 +678,7 @@ function createMiniDefinition(jsonData: JsonData): JSON {
           getRepeatStringIndex(RepeatStringsName.PlugCategoryIdentifier, plugCategoryIdentifier)
         }
 
-        var uiPlugLabel = plug.uiPlugLabel
+        const uiPlugLabel = plug.uiPlugLabel
         if (uiPlugLabel) {
           p.pl = getRepeatStringIndex(RepeatStringsName.UiPlugLabel, uiPlugLabel)
         }
@@ -700,7 +696,7 @@ function createMiniDefinition(jsonData: JsonData): JSON {
         }
       }
 
-      var traitIds = jsonData[key].traitIds
+      const traitIds = jsonData[key].traitIds
       if (traitIds) {
         const ti: any[] = []
 
@@ -757,13 +753,13 @@ function createMiniDefinition(jsonData: JsonData): JSON {
         for (const socketCategory of sockets.socketCategories) {
           const socCatEntry: any = {}
 
-          var h = socketCategory?.socketCategoryHash
+          const h = socketCategory?.socketCategoryHash
           if (h) {
             socCatEntry.h = getRepeatStringIndex(RepeatStringsName.SocketCategoryHash, h)
           }
 
           /// NOTE: In ishtar you want to Json.parse the string you get to turn it into a json array.
-          var socketIndexes = socketCategory?.socketIndexes
+          const socketIndexes = socketCategory?.socketIndexes
           if (socketIndexes) {
             socCatEntry.i = getRepeatStringIndex(RepeatStringsName.SocketIndexes, JSON.stringify(socketIndexes))
             scJson.push(socCatEntry)
