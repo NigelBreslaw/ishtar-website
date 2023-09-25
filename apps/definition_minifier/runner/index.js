@@ -283,7 +283,8 @@ function createMiniDefinition(jsonData) {
                 }
                 const icon = displayProperties.icon;
                 if (icon) {
-                    item.i = getRepeatStringIndex(RepeatStringsName.Icon, stripImageUrl(icon));
+                    item.i = stripImageUrl(icon);
+                    item.i2 = getRepeatStringIndex(RepeatStringsName.Icon, stripImageUrl(icon));
                 }
                 const iconSequences = displayProperties.iconSequences;
                 if (iconSequences) {
@@ -670,7 +671,7 @@ function saveToJsonFile(data, filePath) {
             console.log(`Data saved to ${filePath}`);
         }
         catch (error) {
-            throw new Error(`Failed to save data to file: ${error}`);
+            throw new Error(`Failed to save data to file: ${error} ${filePath}`);
         }
     });
 }
