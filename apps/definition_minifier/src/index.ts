@@ -802,7 +802,7 @@ async function saveToJsonFile(data: any, filePath: string): Promise<void> {
     await fs.promises.writeFile(filePath, jsonString, "utf-8")
     console.log(`Data saved to ${filePath}`)
   } catch (error) {
-    throw new Error(`Failed to save data to file: ${error}`)
+    throw new Error(`Failed to save data to file: ${error} ${filePath}`)
   }
 }
 
